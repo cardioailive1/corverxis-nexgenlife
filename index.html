@@ -1440,6 +1440,7 @@ document.querySelectorAll('.modal-ovl').forEach(function(o){
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') document.querySelectorAll('.modal-ovl.open').forEach(function(m){m.classList.remove('open');}); });
 
 function openDoc(mod, docName) {
+  _currentDocMod = mod || '';
   var titleEl = document.getElementById('docModalTitle');
   var subEl   = document.getElementById('docModalSub');
   var selEl   = document.getElementById('docType');
@@ -1456,15 +1457,40 @@ function openDoc(mod, docName) {
 function generateDoc() {
   var prog = (document.getElementById('docProgramme')||{}).value || '';
   var type = (document.getElementById('docType')||{}).value || '';
+  var jur  = (document.getElementById('docJurisdiction')||{}).value || '';
+  var notes= (document.getElementById('docNotes')||{}).value || '';
   if (!prog.trim()) { toast('Enter a programme or product name', 'err'); return; }
   closeModal('docModal');
-  toast('Generating ' + type + ' for ' + prog + '…', 'ok');
+  // Pre-fill the Live Demo with the selected document details and open it
   setTimeout(function() {
-    toast(type + ' generated — opening NexGen Console', 'ok');
-    var prompt = encodeURIComponent('Generate a complete, regulatory-compliant ' + type + ' for: ' + prog + '. Follow all applicable regulatory guidelines and include all required sections.');
-    setTimeout(function() { window.open('nexgen-console.html', '_blank'); }, 1200);
-  }, 2000);
+    // Map doc modal type to live demo dropdown value
+    var modToLdp = {
+      'medical-device':'510k','fda':'ind','drug-dev':'ib',
+      'preclinical':'glp-protocol','clinical':'protocol','qms':'sop',
+      'rd':'lit-review','patent':'us-prov'
+    };
+    // Open live demo
+    openLiveDemo();
+    // Pre-fill fields after modal opens
+    setTimeout(function() {
+      var selEl = document.getElementById('ldpDocType');
+      var inpEl = document.getElementById('ldpProduct');
+      var jurEl = document.getElementById('ldpJurisdiction');
+      var ctxEl = document.getElementById('ldpContext');
+      if (selEl && modToLdp[_currentDocMod]) selEl.value = modToLdp[_currentDocMod];
+      if (inpEl) inpEl.value = prog;
+      if (ctxEl) ctxEl.value = (notes ? notes + '\n' : '') + 'Document type requested: ' + type;
+      if (jurEl) {
+        Array.from(jurEl.options).forEach(function(o,i){
+          if (jur && o.text.indexOf(jur.split(' ')[0]) !== -1) jurEl.selectedIndex = i;
+        });
+      }
+      ldpUpdatePrompt();
+      toast('Ready — click Generate Document to create your ' + type, 'ok');
+    }, 300);
+  }, 100);
 }
+var _currentDocMod = '';
 
 function submitDemo() {
   closeModal('demoModal');
