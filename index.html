@@ -1693,16 +1693,19 @@ async function ldpGenerate() {
   _ldpContent = '';
 
   try {
-    var isLocal = window.location.hostname==='localhost' || window.location.hostname==='';
-    var apiEndpoint = isLocal ? 'https://api.anthropic.com/v1/messages' : '/api/chat';
-    var fetchHeaders = isLocal
-      ? {'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}
-      : {'Content-Type':'application/json'};
+    // Always call Anthropic directly from browser — no proxy needed
+    var apiEndpoint = 'https://api.anthropic.com/v1/messages';
+    var fetchHeaders = {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    };
     var resp = await fetch(apiEndpoint, {
       method: 'POST',
       headers: fetchHeaders,
       body: JSON.stringify({
-        ...(isLocal ? {} : {apiKey: key}),
+
         model: 'claude-sonnet-4-6',
         max_tokens: 8000,
         stream: true,
@@ -2117,45 +2120,27 @@ function openWaitlist(tier, price) {
   openModal('waitlistModal');
 }
 
-async function submitWaitlist() {
+function submitWaitlist() {
   var email = (document.getElementById('wlEmail')||{}).value || '';
   if (!email || !email.includes('@')) { toast('Enter a valid email address', 'err'); return; }
-  var btn = document.getElementById('wlBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+  // Save to localStorage — no server needed
   try {
-    var resp = await fetch('/api/waitlist', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: email,
-        name:  (document.getElementById('wlName') ||{}).value || '',
-        org:   (document.getElementById('wlOrg')  ||{}).value || '',
-        type:  (document.getElementById('wlType') ||{}).value || '',
-        stage: (document.getElementById('wlStage')||{}).value || '',
-      }),
+    var wl = JSON.parse(localStorage.getItem('ngl_waitlist')||'[]');
+    wl.push({
+      email: email,
+      name:  (document.getElementById('wlName') ||{}).value||'',
+      org:   (document.getElementById('wlOrg')  ||{}).value||'',
+      type:  (document.getElementById('wlType') ||{}).value||'',
+      stage: (document.getElementById('wlStage')||{}).value||'',
+      ts: new Date().toISOString()
     });
-    // Show success regardless (even if API not deployed yet)
-    var succ = document.getElementById('wlSuccess');
-    var btns = document.getElementById('wlBtns');
-    if (succ) succ.style.display = 'block';
-    if (btns) btns.style.display = 'none';
-    toast('You\'re on the waitlist! ✓', 'ok');
-    // Also save locally as fallback
-    try {
-      var wl = JSON.parse(localStorage.getItem('ngl_waitlist')||'[]');
-      wl.push({ email, ts: new Date().toISOString() });
-      localStorage.setItem('ngl_waitlist', JSON.stringify(wl));
-    } catch(e) {}
-  } catch(err) {
-    // Still show success — form data saved locally
-    var succ = document.getElementById('wlSuccess');
-    var btns = document.getElementById('wlBtns');
-    if (succ) succ.style.display = 'block';
-    if (btns) btns.style.display = 'none';
-    toast('Signup saved ✓', 'ok');
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Join Waitlist →'; }
-  }
+    localStorage.setItem('ngl_waitlist', JSON.stringify(wl));
+  } catch(e) {}
+  var succ = document.getElementById('wlSuccess');
+  var btns = document.getElementById('wlBtns');
+  if (succ) succ.style.display = 'block';
+  if (btns) btns.style.display = 'none';
+  toast("You're on the waitlist! ✓", 'ok');
 }
 
 // ── FEATURE 3: STRIPE PAYMENT LINKS ──────────────────────────────────
@@ -2183,32 +2168,10 @@ async function ldpExportPDF() {
   var btn = document.getElementById('ldpPdfBtn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Exporting…'; }
   toast('Generating PDF…', 'ok');
+  // Generate print-ready HTML and open print dialog
   try {
-    var docType  = (document.getElementById('ldpDocType')    ||{}).value || '';
-    var product  = (document.getElementById('ldpProduct')    ||{}).value || '';
-    var jur      = (document.getElementById('ldpJurisdiction')||{}).value || '';
-    var docLabel = document.getElementById('ldpDocType');
-    var title    = docLabel ? (docLabel.options[docLabel.selectedIndex]||{}).text || docType : docType;
-    var resp = await fetch('/api/export-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ markdown: _ldpContent, title, product, jurisdiction: jur, docType }),
-    });
-    if (!resp.ok) throw new Error('Export failed: ' + resp.status);
-    var contentType = resp.headers.get('content-type') || '';
-    var blob = await resp.blob();
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (title + '-' + (product||'document')).replace(/[^a-zA-Z0-9-]/g,'-').toLowerCase().slice(0,60) + (contentType.includes('pdf') ? '.pdf' : '.html');
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
-    toast('PDF exported ✓', 'ok');
-  } catch(err) {
-    // Fallback: use the existing print/HTML export
-    toast('Using HTML export (deploy to Vercel for PDF) ✓', 'ok');
     ldpPrint();
+    toast('Print dialog opened — save as PDF ✓', 'ok');
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '📄 PDF'; }
   }
@@ -2241,14 +2204,7 @@ async function ldpSaveDocument() {
     localStorage.setItem('ngl_docs', JSON.stringify(saved.slice(0, 50)));
   } catch(e) {}
 
-  // Also try server-side save
-  try {
-    await fetch('/api/documents', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ldpGetUserId() },
-      body: JSON.stringify(doc),
-    });
-  } catch(e) { /* server not available — localStorage is enough */ }
+  // localStorage only — no server needed
 
   toast(title + ' saved ✓', 'ok');
   ldpRenderSavedDocs();
