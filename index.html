@@ -1366,6 +1366,7 @@ nav {
 
 <script>
 'use strict';
+var _currentDocMod = '';
 
 // ── DOCUMENT DATA ──────────────────────────────────────────────────────
 var DOCS = [
@@ -1485,6 +1486,7 @@ document.querySelectorAll('.modal-ovl').forEach(function(o){
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') document.querySelectorAll('.modal-ovl.open').forEach(function(m){m.classList.remove('open');}); });
 
 function openDoc(mod, docName) {
+  _currentDocMod = mod || '';
   var titleEl = document.getElementById('docModalTitle');
   var subEl   = document.getElementById('docModalSub');
   var selEl   = document.getElementById('docType');
@@ -1501,14 +1503,38 @@ function openDoc(mod, docName) {
 function generateDoc() {
   var prog = (document.getElementById('docProgramme')||{}).value || '';
   var type = (document.getElementById('docType')||{}).value || '';
+  var jur  = (document.getElementById('docJurisdiction')||{}).value || '';
+  var notes= (document.getElementById('docNotes')||{}).value || '';
   if (!prog.trim()) { toast('Enter a programme or product name', 'err'); return; }
   closeModal('docModal');
-  toast('Generating ' + type + ' for ' + prog + '…', 'ok');
+
+  // Map module to live demo doc type
+  var modToLdp = {
+    'medical-device':'510k', 'fda':'ind', 'drug-dev':'ib',
+    'preclinical':'glp-protocol', 'clinical':'protocol', 'qms':'sop',
+    'rd':'lit-review', 'patent':'us-prov'
+  };
+
+  // Open the Live Demo panel
+  openLiveDemo();
+
+  // Pre-fill fields after panel opens
   setTimeout(function() {
-    toast(type + ' generated — opening NexGen Console', 'ok');
-    var prompt = encodeURIComponent('Generate a complete, regulatory-compliant ' + type + ' for: ' + prog + '. Follow all applicable regulatory guidelines and include all required sections.');
-    setTimeout(function() { window.open('nexgen-console.html', '_blank'); }, 1200);
-  }, 2000);
+    var selEl = document.getElementById('ldpDocType');
+    var inpEl = document.getElementById('ldpProduct');
+    var jurEl = document.getElementById('ldpJurisdiction');
+    var ctxEl = document.getElementById('ldpContext');
+    if (selEl && modToLdp[_currentDocMod]) selEl.value = modToLdp[_currentDocMod];
+    if (inpEl) inpEl.value = prog;
+    if (ctxEl) ctxEl.value = (notes ? notes + '\n' : '') + (type ? 'Document: ' + type : '');
+    if (jurEl && jur) {
+      Array.from(jurEl.options).forEach(function(o, i) {
+        if (o.text.indexOf(jur.split(' ')[0]) !== -1) jurEl.selectedIndex = i;
+      });
+    }
+    ldpUpdatePrompt();
+    toast('Ready — click Generate Document to create your ' + type, 'ok');
+  }, 400);
 }
 
 function submitDemo() {
@@ -2227,11 +2253,7 @@ async function submitWaitlist() {
 
 // ── FEATURE 3: STRIPE PAYMENT LINKS ──────────────────────────────────
 // Replace with your real Stripe payment link URLs after creating products
-var STRIPE_LINKS = {
-  starter:      'https://buy.stripe.com/00w00j7h0ge19v51B01oI00',
-  professional: 'https://buy.stripe.com/9B68wPatcbXLcHhbbA1oI01',
-  enterprise:   'https://buy.stripe.com/cNi9AT58Se5TgXxfrQ1oI03',
-};
+// STRIPE_LINKS moved to auth script
 
 function openStripeCheckout(tier) {
   var link = STRIPE_LINKS[tier];
@@ -2460,6 +2482,76 @@ openLiveDemo = function() {
 </div>
 
 <script>
+// ── PAYWALL & SUBSCRIPTION GATE ───────────────────────
+var STRIPE_LINKS = {
+  starter:      'https://buy.stripe.com/00w00j7h0ge19v51B01oI00',
+  professional: 'https://buy.stripe.com/9B68wPatcbXLcHhbbA1oI01',
+  enterprise:   'https://buy.stripe.com/cNi9AT58Se5TgXxfrQ1oI03',
+};
+
+function paywallCheckout(plan) {
+  // Save pending plan so we can grant access after payment
+  localStorage.setItem('ngl_pending_plan', plan);
+  window.open(STRIPE_LINKS[plan], '_blank');
+  // Show a message telling user to return after payment
+  var pw = document.getElementById('paywallScreen');
+  if (pw) {
+    var msg = pw.querySelector('.paywall-return-msg');
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.className = 'paywall-return-msg';
+      msg.style.cssText = 'background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.2);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:16px;text-align:center';
+      msg.innerHTML = '&#9654; Stripe checkout opened. After payment, click below to activate your account.&nbsp;&nbsp;<button onclick="activateAfterPayment()" style="background:var(--accent);color:#04080E;border:none;border-radius:5px;padding:5px 14px;font-family:var(--mono);font-size:9.5px;font-weight:700;cursor:pointer;margin-left:8px">I have paid &#x2192;</button>';
+      pw.querySelector('div').appendChild(msg);
+    }
+  }
+}
+
+function activateAfterPayment() {
+  // In production: verify payment via Stripe webhook
+  // For now: grant access and mark as paid
+  var plan = localStorage.getItem('ngl_pending_plan') || 'starter';
+  var user = null;
+  try { user = JSON.parse(localStorage.getItem('ngl_user') || 'null'); } catch(e) {}
+  if (user) {
+    user.plan = plan;
+    user.paid = true;
+    user.paidAt = new Date().toISOString();
+    localStorage.setItem('ngl_user', JSON.stringify(user));
+    localStorage.removeItem('ngl_pending_plan');
+    hidepaywall();
+    toast('Welcome to NexGenLife ' + plan.charAt(0).toUpperCase() + plan.slice(1) + '! ✓', 'ok');
+  }
+}
+
+function showPaywall() {
+  var pw = document.getElementById('paywallScreen');
+  if (pw) pw.style.display = 'flex';
+}
+
+function hidepaywall() {
+  var pw = document.getElementById('paywallScreen');
+  if (pw) pw.style.display = 'none';
+}
+
+function checkSubscription(user) {
+  if (!user) return false;
+  // Check if user has paid plan
+  if (user.paid && user.plan) return true;
+  // Check URL params (Stripe success redirect adds ?session_id=xxx)
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('session_id') || params.get('payment') === 'success') {
+    // Grant access
+    user.paid = true;
+    user.plan = localStorage.getItem('ngl_pending_plan') || 'starter';
+    user.paidAt = new Date().toISOString();
+    localStorage.setItem('ngl_user', JSON.stringify(user));
+    localStorage.removeItem('ngl_pending_plan');
+    return true;
+  }
+  return false;
+}
+
 // ── BUILT-IN AUTH ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
   var user = null;
@@ -2471,9 +2563,24 @@ function showAuth(show, user){
   var wall=document.getElementById('authWall');
   var bar=document.getElementById('authUserBar');
   var name=document.getElementById('authUserName');
-  if(wall) wall.style.display = show ? 'flex' : 'none';
-  if(bar)  bar.style.display  = show ? 'none' : 'flex';
-  if(name&&user) name.textContent = user.name||user.email;
+  if(show){
+    // Show login wall, hide paywall
+    if(wall) wall.style.display='flex';
+    if(bar)  bar.style.display='none';
+    hidepaywall();
+  } else {
+    // User is signed in — check if they have a paid plan
+    if(wall) wall.style.display='none';
+    if(bar)  bar.style.display='flex';
+    if(name&&user) name.textContent=(user.name||user.email)+(user.plan?' · '+user.plan.charAt(0).toUpperCase()+user.plan.slice(1):'');
+    if(!checkSubscription(user)){
+      // No subscription — show paywall
+      showPaywall();
+    } else {
+      // Paid user — full access
+      hidepaywall();
+    }
+  }
 }
 
 function authTab(tab){
@@ -2530,10 +2637,61 @@ function authSignUp(){
 
 function authSignOut(){
   localStorage.removeItem('ngl_user');
+  hidepaywall();
   showAuth(true,null);
   authTab('signin');
 }
 
 </script>
+
+<!-- PAYWALL SCREEN -->
+<div id="paywallScreen" style="display:none;position:fixed;inset:0;background:rgba(11,23,37,.98);z-index:9998;align-items:center;justify-content:center;backdrop-filter:blur(16px);padding:20px">
+  <div style="background:#0D1B2E;border:1px solid rgba(0,200,255,.25);border-radius:16px;padding:40px;max-width:680px;width:100%;text-align:center;box-shadow:0 0 60px rgba(0,200,255,.1)">
+    <div style="font-size:42px;margin-bottom:14px">🧬</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px">NexGenLife</div>
+    <div style="font-size:24px;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:10px">Choose Your Plan to Continue</div>
+    <div style="font-size:14px;color:var(--dim);line-height:1.7;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto">
+      Your account has been created. Select a plan to access the full NexGenLife platform and start generating regulatory documents.
+    </div>
+
+    <!-- Plan cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px">
+
+      <!-- Starter -->
+      <div style="background:#0F2035;border:1px solid rgba(0,200,255,.15);border-radius:12px;padding:22px;text-align:center;transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor='rgba(0,200,255,.4)'" onmouseout="this.style.borderColor='rgba(0,200,255,.15)'">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Starter</div>
+        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-1px;margin-bottom:4px">$490</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:16px">/month</div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:16px;line-height:1.6">3 programmes · 50 docs/mo · All 8 modules</div>
+        <button onclick="paywallCheckout('starter')" style="width:100%;padding:10px;background:var(--accent);color:#04080E;border:none;border-radius:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;cursor:pointer;letter-spacing:.5px">Get Started →</button>
+      </div>
+
+      <!-- Professional -->
+      <div style="background:#0F2035;border:2px solid rgba(0,200,255,.35);border-radius:12px;padding:22px;text-align:center;position:relative;cursor:pointer" onmouseover="this.style.borderColor='rgba(0,200,255,.6)'" onmouseout="this.style.borderColor='rgba(0,200,255,.35)'">
+        <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:#04080E;font-family:var(--mono);font-size:7.5px;font-weight:700;padding:3px 12px;border-radius:10px;letter-spacing:1px;white-space:nowrap">MOST POPULAR</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Professional</div>
+        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-1px;margin-bottom:4px">$1,490</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:16px">/month</div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:16px;line-height:1.6">Unlimited · All modules · Priority support</div>
+        <button onclick="paywallCheckout('professional')" style="width:100%;padding:10px;background:var(--accent);color:#04080E;border:none;border-radius:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;cursor:pointer;letter-spacing:.5px">Get Started →</button>
+      </div>
+
+      <!-- Enterprise -->
+      <div style="background:#0F2035;border:1px solid rgba(0,200,255,.15);border-radius:12px;padding:22px;text-align:center;cursor:pointer" onmouseover="this.style.borderColor='rgba(0,200,255,.4)'" onmouseout="this.style.borderColor='rgba(0,200,255,.15)'">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Enterprise</div>
+        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-1px;margin-bottom:4px">Custom</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:16px">&nbsp;</div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:16px;line-height:1.6">Private cloud · Custom AI · Dedicated specialist</div>
+        <button onclick="paywallCheckout('enterprise')" style="width:100%;padding:10px;background:transparent;border:1px solid rgba(0,200,255,.3);color:var(--accent);border-radius:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;cursor:pointer;letter-spacing:.5px">Contact Sales →</button>
+      </div>
+
+    </div>
+
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:14px">
+      ✓ Cancel anytime &nbsp;·&nbsp; ✓ 14-day money-back guarantee &nbsp;·&nbsp; ✓ Instant access after payment
+    </div>
+    <button onclick="authSignOut()" style="background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:9px;cursor:pointer;text-decoration:underline">Sign out</button>
+  </div>
+</div>
 </body>
 </html>
