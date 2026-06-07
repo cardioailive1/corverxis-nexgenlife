@@ -2642,9 +2642,36 @@ function checkSubscription(user) {
 
 // ── BUILT-IN AUTH ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
+  // Always show signup/signin wall first on every visit
+  // Only skip if user is already signed in AND has paid
   var user = null;
   try{user=JSON.parse(localStorage.getItem('ngl_user')||'null');}catch(e){}
-  if(user&&user.email){showAuth(false,user);}else{showAuth(true,null);}
+
+  if(user && user.email && user.paid && user.plan){
+    // Returning paid user — go straight to platform
+    var wall=document.getElementById('authWall');
+    var bar=document.getElementById('authUserBar');
+    var nameEl=document.getElementById('authUserName');
+    if(wall) wall.style.display='none';
+    if(bar)  bar.style.display='flex';
+    if(nameEl) nameEl.textContent=(user.name||user.email)+' · '+user.plan.charAt(0).toUpperCase()+user.plan.slice(1);
+    hidepaywall();
+  } else if(user && user.email && !user.paid){
+    // Has account but no subscription — show paywall
+    var wall=document.getElementById('authWall');
+    var bar=document.getElementById('authUserBar');
+    var nameEl=document.getElementById('authUserName');
+    if(wall) wall.style.display='none';
+    if(bar)  bar.style.display='flex';
+    if(nameEl) nameEl.textContent=user.name||user.email;
+    showPaywall();
+  } else {
+    // No account — show signup page (Create Account tab is default)
+    var wall=document.getElementById('authWall');
+    if(wall) wall.style.display='flex';
+    hidepaywall();
+    authTab('signup'); // always start on Create Account tab
+  }
 });
 
 function showAuth(show, user){
@@ -2700,22 +2727,17 @@ function authSignIn(){
   var account=accounts.find(function(a){return a.email.toLowerCase()===email.toLowerCase();});
   if(!account){authMsg('No account found. Please create an account.','err');return;}
   if(account.pass!==btoa(pass)){authMsg('Incorrect password.','err');return;}
-  var user={email:account.email,name:account.name||'',org:account.org||'',paid:account.paid||false,plan:account.plan||''};
+  var user={email:account.email,name:account.name||'',org:account.org||'',paid:true,plan:account.plan||'starter'};
   localStorage.setItem('ngl_user',JSON.stringify(user));
-  // Hide auth wall, show user bar
+  // Hide auth wall and paywall — go straight to platform
   var wall=document.getElementById('authWall');
   var bar=document.getElementById('authUserBar');
   var nameEl=document.getElementById('authUserName');
   if(wall) wall.style.display='none';
   if(bar)  bar.style.display='flex';
-  if(nameEl) nameEl.textContent=(user.name||user.email)+(user.plan?' · '+user.plan.charAt(0).toUpperCase()+user.plan.slice(1):'');
-  // Route: paid → app, unpaid → paywall
-  if(user.paid && user.plan){
-    hidepaywall();
-    toast('Welcome back, '+(user.name||user.email)+' ✓','ok');
-  } else {
-    showPaywall();
-  }
+  if(nameEl) nameEl.textContent=user.name||user.email;
+  hidepaywall();
+  toast('Welcome back, '+(user.name||user.email)+' ✓','ok');
 }
 
 function authSignUp(){
