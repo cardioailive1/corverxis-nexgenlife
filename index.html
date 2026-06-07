@@ -2536,15 +2536,15 @@ openLiveDemo = function() {
     <div id="authError" style="display:none;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:11px;color:#FF6B6B;margin-bottom:10px"></div>
     <div id="authSuccess" style="display:none;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.3);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:10px"></div>
     <div style="display:flex;margin-bottom:20px;border:1px solid var(--b2);border-radius:8px;overflow:hidden">
-      <button id="tabSignIn" onclick="authTab('signin')" style="flex:1;padding:9px;font-family:var(--mono);font-size:10px;border:none;cursor:pointer;background:var(--accent);color:#04080E;font-weight:700">Sign In</button>
-      <button id="tabSignUp" onclick="authTab('signup')" style="flex:1;padding:9px;font-family:var(--mono);font-size:10px;border:none;cursor:pointer;background:transparent;color:var(--dim)">Create Account</button>
+      <button id="tabSignIn" onclick="authTab('signin')" style="flex:1;padding:9px;font-family:var(--mono);font-size:10px;border:none;cursor:pointer;background:transparent;color:var(--dim)">Sign In</button>
+      <button id="tabSignUp" onclick="authTab('signup')" style="flex:1;padding:9px;font-family:var(--mono);font-size:10px;border:none;cursor:pointer;background:var(--accent);color:#04080E;font-weight:700">Create Account</button>
     </div>
-    <div id="formSignIn">
+    <div id="formSignIn" style="display:none">
       <input id="siEmail" type="email" placeholder="Email address" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
       <input id="siPass" type="password" placeholder="Password" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:14px;box-sizing:border-box"/>
       <button onclick="authSignIn()" style="width:100%;padding:13px;background:var(--accent);color:#04080E;border:none;border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer">Sign In &#x2192;</button>
     </div>
-    <div id="formSignUp" style="display:none">
+    <div id="formSignUp">
       <input id="suName" type="text" placeholder="Full name" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
       <input id="suEmail" type="email" placeholder="Work email" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
       <input id="suOrg" type="text" placeholder="Organisation" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
@@ -2588,8 +2588,6 @@ function paywallCheckout(plan) {
 }
 
 function activateAfterPayment() {
-  // In production: verify payment via Stripe webhook
-  // For now: grant access and mark as paid
   var plan = localStorage.getItem('ngl_pending_plan') || 'starter';
   var user = null;
   try { user = JSON.parse(localStorage.getItem('ngl_user') || 'null'); } catch(e) {}
@@ -2598,9 +2596,19 @@ function activateAfterPayment() {
     user.paid = true;
     user.paidAt = new Date().toISOString();
     localStorage.setItem('ngl_user', JSON.stringify(user));
+    // Also update the accounts array so next login remembers paid status
+    try {
+      var accounts = JSON.parse(localStorage.getItem('ngl_accounts') || '[]');
+      var idx2 = accounts.findIndex(function(a){ return a.email.toLowerCase() === user.email.toLowerCase(); });
+      if (idx2 >= 0) { accounts[idx2].paid = true; accounts[idx2].plan = plan; accounts[idx2].paidAt = user.paidAt; }
+      localStorage.setItem('ngl_accounts', JSON.stringify(accounts));
+    } catch(e) {}
     localStorage.removeItem('ngl_pending_plan');
     hidepaywall();
-    toast('Welcome to NexGenLife ' + plan.charAt(0).toUpperCase() + plan.slice(1) + '! ✓', 'ok');
+    // Update user bar
+    var nameEl = document.getElementById('authUserName');
+    if (nameEl) nameEl.textContent = (user.name||user.email) + ' · ' + plan.charAt(0).toUpperCase() + plan.slice(1);
+    toast('Welcome to NexGenLife ' + plan.charAt(0).toUpperCase() + plan.slice(1) + '! Full access granted ✓', 'ok');
   }
 }
 
@@ -2692,9 +2700,22 @@ function authSignIn(){
   var account=accounts.find(function(a){return a.email.toLowerCase()===email.toLowerCase();});
   if(!account){authMsg('No account found. Please create an account.','err');return;}
   if(account.pass!==btoa(pass)){authMsg('Incorrect password.','err');return;}
-  var user={email:account.email,name:account.name||'',org:account.org||''};
+  var user={email:account.email,name:account.name||'',org:account.org||'',paid:account.paid||false,plan:account.plan||''};
   localStorage.setItem('ngl_user',JSON.stringify(user));
-  showAuth(false,user);
+  // Hide auth wall, show user bar
+  var wall=document.getElementById('authWall');
+  var bar=document.getElementById('authUserBar');
+  var nameEl=document.getElementById('authUserName');
+  if(wall) wall.style.display='none';
+  if(bar)  bar.style.display='flex';
+  if(nameEl) nameEl.textContent=(user.name||user.email)+(user.plan?' · '+user.plan.charAt(0).toUpperCase()+user.plan.slice(1):'');
+  // Route: paid → app, unpaid → paywall
+  if(user.paid && user.plan){
+    hidepaywall();
+    toast('Welcome back, '+(user.name||user.email)+' ✓','ok');
+  } else {
+    showPaywall();
+  }
 }
 
 function authSignUp(){
@@ -2709,10 +2730,19 @@ function authSignUp(){
   if(accounts.find(function(a){return a.email.toLowerCase()===email.toLowerCase();})){authMsg('Account already exists. Please sign in.','err');return;}
   accounts.push({email:email,name:name,org:org,pass:btoa(pass),created:new Date().toISOString()});
   localStorage.setItem('ngl_accounts',JSON.stringify(accounts));
-  var user={email:email,name:name,org:org};
+  var user={email:email,name:name,org:org,paid:false};
   localStorage.setItem('ngl_user',JSON.stringify(user));
-  authMsg('Account created! Welcome to NexGenLife.','ok');
-  setTimeout(function(){showAuth(false,user);},800);
+  authMsg('Account created! Setting up your subscription…','ok');
+  // After signup: hide auth wall, show paywall immediately
+  setTimeout(function(){
+    var wall=document.getElementById('authWall');
+    var bar=document.getElementById('authUserBar');
+    var nameEl=document.getElementById('authUserName');
+    if(wall) wall.style.display='none';
+    if(bar)  bar.style.display='flex';
+    if(nameEl) nameEl.textContent=user.name||user.email;
+    showPaywall();
+  }, 800);
 }
 
 function authSignOut(){
