@@ -2642,35 +2642,33 @@ function checkSubscription(user) {
 
 // ── BUILT-IN AUTH ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
-  // Always show signup/signin wall first on every visit
-  // Only skip if user is already signed in AND has paid
+  // Clear any stale sessions from old versions
+  var APP_VERSION = 'v2.0';
+  if(localStorage.getItem('ngl_version') !== APP_VERSION){
+    // New version — clear old cached user sessions that may have wrong state
+    localStorage.removeItem('ngl_user');
+    localStorage.removeItem('ngl_pending_plan');
+    localStorage.setItem('ngl_version', APP_VERSION);
+  }
+
   var user = null;
   try{user=JSON.parse(localStorage.getItem('ngl_user')||'null');}catch(e){}
 
+  var wall   = document.getElementById('authWall');
+  var bar    = document.getElementById('authUserBar');
+  var nameEl = document.getElementById('authUserName');
+
   if(user && user.email && user.paid && user.plan){
     // Returning paid user — go straight to platform
-    var wall=document.getElementById('authWall');
-    var bar=document.getElementById('authUserBar');
-    var nameEl=document.getElementById('authUserName');
-    if(wall) wall.style.display='none';
-    if(bar)  bar.style.display='flex';
-    if(nameEl) nameEl.textContent=(user.name||user.email)+' · '+user.plan.charAt(0).toUpperCase()+user.plan.slice(1);
+    if(wall)   wall.style.display   = 'none';
+    if(bar)    bar.style.display    = 'flex';
+    if(nameEl) nameEl.textContent   = (user.name||user.email)+' · '+user.plan.charAt(0).toUpperCase()+user.plan.slice(1);
     hidepaywall();
-  } else if(user && user.email && !user.paid){
-    // Has account but no subscription — show paywall
-    var wall=document.getElementById('authWall');
-    var bar=document.getElementById('authUserBar');
-    var nameEl=document.getElementById('authUserName');
-    if(wall) wall.style.display='none';
-    if(bar)  bar.style.display='flex';
-    if(nameEl) nameEl.textContent=user.name||user.email;
-    showPaywall();
   } else {
-    // No account — show signup page (Create Account tab is default)
-    var wall=document.getElementById('authWall');
-    if(wall) wall.style.display='flex';
+    // Everyone else — show Create Account page first
+    if(wall) wall.style.display = 'flex';
     hidepaywall();
-    authTab('signup'); // always start on Create Account tab
+    authTab('signup');
   }
 });
 
