@@ -445,7 +445,7 @@ footer a:hover{color:var(--text)}
   <p class="hero-sub">NexGenLife streamlines every stage of the life sciences journey — from medical device documentation and FDA submissions to drug development, clinical trials, and market launch. Powered by NexGen Ultra.</p>
   <div class="hero-btns">
     <button class="hbtn primary" onclick="openLiveDemo()">⚡ Try Live Demo</button>
-    <button class="hbtn ghost" onclick="openModal('demoModal')">🧬 Request Demo</button>
+    <button class="hbtn ghost" onclick="openLiveDemo()">🧬 Try Live Demo</button>
     <button class="hbtn ghost" onclick="scrollTo('modules')">Explore Modules ↓</button>
   </div>
   <div class="hero-stats">
@@ -923,7 +923,7 @@ footer a:hover{color:var(--text)}
         <li class="off">Multi-jurisdiction parallel submissions</li>
         <li class="off">Dedicated regulatory specialist</li>
       </ul>
-      <button class="price-cta sec" onclick="openWaitlist('Starter','$490/mo')">Start Free Trial →</button>
+      <button class="price-cta sec" onclick="window.open('https://buy.stripe.com/00w00j7h0ge19v51B01oI00','_blank')">Start Free Trial →</button>
     </div>
 
     <div class="price-card featured">
@@ -941,7 +941,7 @@ footer a:hover{color:var(--text)}
         <li>Priority support (24h response)</li>
         <li class="off">Dedicated regulatory specialist</li>
       </ul>
-      <button class="price-cta prim" onclick="openWaitlist('Professional','$1,490/mo')">Get Started →</button>
+      <button class="price-cta prim" onclick="window.open('https://buy.stripe.com/00wfZhcBk3rfbDd5Rg1oI02','_blank')">Get Started →</button>
     </div>
 
     <div class="price-card">
@@ -958,7 +958,7 @@ footer a:hover{color:var(--text)}
         <li>Custom validation package (CSV/IQ/OQ/PQ)</li>
         <li>White-label option available</li>
       </ul>
-      <button class="price-cta sec" onclick="openWaitlist('Enterprise','Custom')">Contact Sales →</button>
+      <button class="price-cta sec" onclick="window.open('https://buy.stripe.com/9B68wPatcbXLcHhbbA1oI01','_blank')">Contact Sales →</button>
     </div>
 
   </div>
@@ -971,7 +971,7 @@ footer a:hover{color:var(--text)}
   <div class="cta-title">Ready to accelerate<br>your time to market?</div>
   <div class="cta-sub">Join leading biotech and pharma companies using NexGenLife to cut documentation time by 80% and submit faster to FDA, EMA, and global regulators.</div>
   <div class="cta-btns">
-    <button class="hbtn primary" onclick="openModal('demoModal')">🧬 Request Demo</button>
+    <button class="hbtn primary" onclick="openLiveDemo()">🧬 Try Live Demo</button>
     <a class="hbtn ghost" href="nexgen-console.html">Open NexGen Console →</a>
   </div>
 </div>
@@ -2172,9 +2172,9 @@ function submitWaitlist() {
 // ── FEATURE 3: STRIPE PAYMENT LINKS ──────────────────────────────────
 // Replace with your real Stripe payment link URLs after creating products
 var STRIPE_LINKS = {
-  starter:      'https://buy.stripe.com/REPLACE_STARTER_LINK',
-  professional: 'https://buy.stripe.com/REPLACE_PRO_LINK',
-  enterprise:   'mailto:hello@corverxis.ai?subject=NexGenLife%20Enterprise%20Enquiry',
+  starter:      'https://buy.stripe.com/00w00j7h0ge19v51B01oI00',
+  professional: 'https://buy.stripe.com/00wfZhcBk3rfbDd5Rg1oI02',
+  enterprise:   'https://buy.stripe.com/9B68wPatcbXLcHhbbA1oI01',
 };
 
 function openStripeCheckout(tier) {
