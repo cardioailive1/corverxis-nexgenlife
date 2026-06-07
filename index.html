@@ -3,14 +3,78 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<!-- Clerk Authentication -->
+<script async crossorigin="anonymous"
+  data-clerk-publishable-key="pk_test_YWxlcnQtY2FyZGluYWwtMzEuY2xlcmsuYWNjb3VudHMuZGV2JA"
+  src="https://alert-cardinal-31.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+  type="text/javascript">
+</script>
+<script>
+// ── CLERK AUTH ────────────────────────────────────────
+var _clerkReady = false;
+
+function showApp(user) {
+  var wall = document.getElementById('authWall');
+  var bar  = document.getElementById('authUserBar');
+  var name = document.getElementById('authUserName');
+  if (wall) wall.style.display = 'none';
+  if (bar)  bar.style.display  = 'flex';
+  if (name) name.textContent = (user && user.firstName) ? user.firstName
+    : (user && user.emailAddresses && user.emailAddresses[0]) ? user.emailAddresses[0].emailAddress : 'User';
+}
+
+// Use redirects — works on every browser without popup blockers
+function clerkSignIn() {
+  if (!window.Clerk) { alert('Authentication loading — please wait and try again.'); return; }
+  window.Clerk.redirectToSignIn({ afterSignInUrl: window.location.href });
+}
+
+function clerkSignUp() {
+  if (!window.Clerk) { alert('Authentication loading — please wait and try again.'); return; }
+  window.Clerk.redirectToSignUp({ afterSignUpUrl: window.location.href });
+}
+
+function clerkSignOut() {
+  if (!window.Clerk) return;
+  window.Clerk.signOut().then(function() {
+    var wall = document.getElementById('authWall');
+    var bar  = document.getElementById('authUserBar');
+    if (wall) wall.style.display = 'flex';
+    if (bar)  bar.style.display  = 'none';
+  });
+}
+
+(function waitForClerk() {
+  if (window.Clerk && typeof window.Clerk.load === 'function') {
+    window.Clerk.load().then(function() {
+      _clerkReady = true;
+      if (window.Clerk.user) {
+        showApp(window.Clerk.user);
+      }
+      window.Clerk.addListener(function(state) {
+        if (state.user) { showApp(state.user); }
+        else {
+          var wall = document.getElementById('authWall');
+          var bar  = document.getElementById('authUserBar');
+          if (wall) wall.style.display = 'flex';
+          if (bar)  bar.style.display  = 'none';
+        }
+      });
+    }).catch(function(e) { console.warn('Clerk error:', e); });
+  } else {
+    setTimeout(waitForClerk, 100);
+  }
+})();
+</script>
+
 <title>NexGenLife — Life Sciences Platform | Corverxis Technologies</title>
 <meta name="description" content="AI-powered life sciences platform for medical devices, FDA submissions, drug development, clinical trials, and quality management."/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#04080E;--surface:#080F18;--panel:#0C1520;--lift:#101C2A;
-  --b:rgba(255,255,255,.06);--b2:rgba(255,255,255,.11);
-  --text:#EEF4F8;--dim:#7A9CB4;--muted:#3A5468;
+  --bg:#0B1725;--surface:#0D1B2E;--panel:#0F2035;--lift:#132840;
+  --b:rgba(0,200,255,.08);--b2:rgba(0,200,255,.14);
+  --text:#FFFFFF;--dim:#8BAFC8;--muted:#4A6C84;
   --accent:#00C8FF;--accent-dim:rgba(0,200,255,.12);--accent-glow:rgba(0,200,255,.18);
   --cyan:#00C8FF;--cyan2:rgba(0,200,255,.12);--cyanglow:rgba(0,200,255,.18);
   --emerald:#00E5A0;--em2:rgba(0,229,160,.1);
@@ -23,10 +87,10 @@
   --body:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
 }
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);background-attachment:fixed;font-family:var(--body);font-size:14px;overflow-x:hidden}
 
 /* ── NAV ── */
-nav{position:sticky;top:0;z-index:100;background:rgba(4,8,14,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--b);height:60px;display:flex;align-items:center;padding:0 28px;gap:10px}
+nav{position:sticky;top:0;z-index:100;background:rgba(11,23,37,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--b);height:60px;display:flex;align-items:center;padding:0 28px;gap:10px}
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto}
 .nav-gem{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--emerald),#006B8A);display:flex;align-items:center;justify-content:center;font-size:17px}
 .nav-wordmark{font-family:var(--serif);font-size:17px;color:var(--text);letter-spacing:-.3px}
@@ -46,9 +110,9 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,8,14,.9);backdrop-filter
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 28px 60px;position:relative;overflow:hidden}
 .hero-bg{position:absolute;inset:0;pointer-events:none}
 .hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35}
-.hero-orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(0,229,160,.3),transparent 70%);top:-100px;left:50%;transform:translateX(-50%)}
-.hero-orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(0,200,255,.2),transparent 70%);bottom:100px;right:-100px}
-.hero-orb-3{width:300px;height:300px;background:radial-gradient(circle,rgba(155,127,255,.15),transparent 70%);bottom:80px;left:-80px}
+.hero-orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(0,200,255,.25),transparent 70%);top:-100px;left:50%;transform:translateX(-50%)}
+.hero-orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(0,153,204,.2),transparent 70%);bottom:100px;right:-100px}
+.hero-orb-3{width:300px;height:300px;background:radial-gradient(circle,rgba(0,200,255,.12),transparent 70%);bottom:80px;left:-80px}
 .hero-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 16px;border-radius:20px;background:var(--em2);border:1px solid rgba(0,200,255,.2);font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px}
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
@@ -76,7 +140,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,8,14,.9);backdrop-filter
 
 /* ── MODULES GRID ── */
 .modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
-.module-card{background:var(--surface);border:1px solid var(--b);border-radius:14px;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s;position:relative}
+.module-card{background:linear-gradient(135deg,var(--surface),var(--panel));border:1px solid var(--b);border-radius:14px;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s;position:relative}
 .module-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;pointer-events:none;border-radius:14px}
 .module-card:hover{transform:translateY(-4px)}
 .module-card.cyan:hover{border-color:rgba(0,200,255,.3);box-shadow:0 16px 48px rgba(0,200,255,.1)}
@@ -177,7 +241,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,8,14,.9);backdrop-filter
 .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
 .price-card{background:var(--surface);border:1px solid var(--b);border-radius:14px;padding:28px;transition:all .2s;position:relative}
 .price-card:hover{border-color:var(--b2);transform:translateY(-3px)}
-.price-card.featured{border-color:rgba(0,229,160,.3);background:linear-gradient(135deg,rgba(0,229,160,.05),var(--surface))}
+.price-card.featured{border-color:rgba(0,200,255,.35);background:linear-gradient(135deg,rgba(0,200,255,.07),var(--surface))}
 .price-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--emerald);color:#020C08;font-family:var(--mono);font-size:8px;font-weight:700;padding:3px 14px;border-radius:12px;letter-spacing:1px;white-space:nowrap}
 .price-tier{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
 .price-val{font-family:var(--serif);font-size:40px;color:var(--text);letter-spacing:-2px;margin-bottom:4px}
@@ -194,7 +258,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(4,8,14,.9);backdrop-filter
 .price-cta.sec:hover{border-color:var(--emerald);color:var(--emerald)}
 
 /* ── CTA SECTION ── */
-.cta-section{background:linear-gradient(135deg,rgba(0,229,160,.06) 0%,rgba(0,200,255,.04) 50%,rgba(155,127,255,.04) 100%);border:1px solid rgba(0,229,160,.12);border-radius:20px;padding:64px 48px;text-align:center;margin:0 28px 88px;max-width:1104px;margin-left:auto;margin-right:auto}
+.cta-section{background:linear-gradient(135deg,rgba(0,200,255,.08) 0%,rgba(0,153,204,.05) 50%,rgba(0,200,255,.04) 100%);border:1px solid rgba(0,229,160,.12);border-radius:20px;padding:64px 48px;text-align:center;margin:0 28px 88px;max-width:1104px;margin-left:auto;margin-right:auto}
 .cta-title{font-family:var(--serif);font-size:clamp(26px,4vw,46px);color:var(--text);letter-spacing:-1.5px;margin-bottom:14px}
 .cta-sub{font-size:15px;color:var(--dim);line-height:1.7;max-width:540px;margin:0 auto 32px}
 .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
@@ -408,6 +472,25 @@ footer a:hover{color:var(--text)}
 .ldp-file-status.error{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.2);color:#FF6B6B}
 .ldp-file-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;line-height:1;flex-shrink:0}
 .ldp-file-remove:hover{color:var(--text)}
+
+
+/* ── CLERK AUTH WALL ─────────────────────────────── */
+.auth-wall{position:fixed;inset:0;background:rgba(11,23,37,.97);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(20px)}
+.auth-box{background:var(--surface);border:1px solid rgba(0,200,255,.3);border-radius:16px;padding:40px;max-width:420px;width:100%;text-align:center;box-shadow:0 0 60px rgba(0,200,255,.1),0 24px 48px rgba(0,0,0,.4)}
+.auth-logo{font-size:40px;margin-bottom:12px}
+.auth-title{font-family:var(--mono);font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:8px}
+.auth-sub{font-size:13.5px;color:var(--dim);line-height:1.7;margin-bottom:28px}
+.auth-btn{width:100%;padding:13px;border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;border:none;transition:all .18s;margin-bottom:10px}
+.auth-btn.signin{background:var(--accent);color:#04080E}
+.auth-btn.signin:hover{opacity:.88;transform:translateY(-1px)}
+.auth-btn.signup{background:transparent;border:1px solid var(--b2);color:var(--text)}
+.auth-btn.signup:hover{border-color:var(--accent);color:var(--accent)}
+.auth-divider{font-family:var(--mono);font-size:9px;color:var(--muted);margin:14px 0;letter-spacing:1px}
+.auth-user-bar{position:fixed;top:60px;right:16px;z-index:1000;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid rgba(0,200,255,.15);border-radius:8px;padding:6px 12px;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.auth-user-name{color:var(--accent);font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auth-signout{background:none;border:1px solid var(--b2);color:var(--muted);font-family:var(--mono);font-size:8.5px;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .13s}
+.auth-signout:hover{border-color:var(--accent);color:var(--accent)}
+#clerkMount{min-height:60px}
 
 </style>
 </head>
@@ -2339,5 +2422,28 @@ openLiveDemo = function() {
 };
 
 </script>
+
+<!-- AUTH WALL -->
+<div class="auth-wall" id="authWall" style="display:flex">
+  <div class="auth-box">
+    <div class="auth-logo">🧬</div>
+    <div class="auth-title">NexGenLife</div>
+    <div class="auth-sub">AI-powered life sciences documentation platform.<br>Sign in or create your free account to continue.</div>
+    <div id="clerkMount"></div>
+    <a class="auth-btn signin" href="https://alert-cardinal-31.clerk.accounts.dev/sign-in?redirect_url=https://corverxis-nexgenlife-ai.vercel.app" style="display:block;text-decoration:none;text-align:center">Sign In →</a>
+    <div class="auth-divider">OR</div>
+    <a class="auth-btn signup" href="https://alert-cardinal-31.clerk.accounts.dev/sign-up?redirect_url=https://corverxis-nexgenlife-ai.vercel.app" style="display:block;text-decoration:none;text-align:center">Create Free Account →</a>
+    <div style="margin-top:16px;font-family:var(--mono);font-size:8.5px;color:var(--muted)">
+      By continuing you agree to our <a href="#" style="color:var(--accent)">Terms</a> and <a href="#" style="color:var(--accent)">Privacy Policy</a>
+    </div>
+  </div>
+</div>
+
+<!-- USER BAR -->
+<div class="auth-user-bar" id="authUserBar" style="display:none">
+  <span>👤</span>
+  <span class="auth-user-name" id="authUserName">Loading...</span>
+  <button class="auth-signout" onclick="clerkSignOut()">Sign out</button>
+</div>
 </body>
 </html>
