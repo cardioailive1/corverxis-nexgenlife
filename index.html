@@ -431,6 +431,7 @@ footer a:hover{color:var(--text)}
   .auth-box{max-width:100% !important}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <style>
@@ -483,8 +484,9 @@ nav {
   </div>
   <div class="nav-right">
     <a class="nav-cta outline" href="nexgen-console.html">← Console</a>
-    <button class="nav-cta outline" onclick="openLiveDemo()">Generate Document</button>
-    <button class="nav-cta solid" onclick="openModal('demoModal')">Request Demo</button>
+    <button class="nav-cta outline" onclick="showNglUpgradeWall()" id="navUpgradeBtn" style="border-color:rgba(255,209,102,.4);color:var(--gold);display:none">⚡ Upgrade</button>
+    <button class="nav-cta solid" onclick="openLiveDemo()">🚀 Launch App</button>
+    <button class="nav-cta outline" onclick="openModal('demoModal')">Request Demo</button>
   </div>
 </nav>
 
@@ -966,7 +968,7 @@ nav {
 
     <div class="price-card">
       <div class="price-tier">Starter</div>
-      <div class="price-val">$490<sub>/month</sub></div>
+      <div class="price-val">$99<sub>/month</sub></div>
       <div class="price-desc">For early-stage biotechs and individual regulatory consultants.</div>
       <ul class="price-features">
         <li>3 active programmes</li>
@@ -978,13 +980,13 @@ nav {
         <li class="off">Multi-jurisdiction parallel submissions</li>
         <li class="off">Dedicated regulatory specialist</li>
       </ul>
-      <button class="price-cta sec" onclick="window.open('https://buy.stripe.com/00w00j7h0ge19v51B01oI00','_blank')">Start Free Trial →</button>
+      <button class="price-cta sec" onclick="window.open('https://buy.stripe.com/28E5kDdFo9PD6iT1B01oI0a','_blank')">Start Free Trial →</button>
     </div>
 
     <div class="price-card featured">
       <div class="price-badge">MOST POPULAR</div>
       <div class="price-tier">Professional</div>
-      <div class="price-val">$1,490<sub>/month</sub></div>
+      <div class="price-val">$499<sub>/month</sub></div>
       <div class="price-desc">For growing biotech and pharma companies managing multiple programmes.</div>
       <ul class="price-features">
         <li>Unlimited programmes</li>
@@ -996,7 +998,7 @@ nav {
         <li>Priority support (24h response)</li>
         <li class="off">Dedicated regulatory specialist</li>
       </ul>
-      <button class="price-cta prim" onclick="window.open('https://buy.stripe.com/9B68wPatcbXLcHhbbA1oI01','_blank')">Get Started →</button>
+      <button class="price-cta prim" onclick="window.open('https://buy.stripe.com/9B68wP30K2nbgXx2F41oI0b','_blank')">Get Started →</button>
     </div>
 
     <div class="price-card">
@@ -1126,7 +1128,7 @@ nav {
     <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--b);flex-shrink:0">
       <div style="width:32px;height:32px;border-radius:8px;background:rgba(0,200,255,.12);border:1px solid rgba(0,200,255,.2);display:flex;align-items:center;justify-content:center;font-size:16px">🧬</div>
       <div style="flex:1">
-        <div style="font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.2px">NexGenLife — AI Document Studio</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.2px">NexGenLife — Launch App</div>
         <div style="font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:1px">POWERED BY NEXGEN ULTRA · GENERATE IN SECONDS</div>
       </div>
       <div style="display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;color:var(--muted)">
@@ -1137,13 +1139,13 @@ nav {
     </div>
 
     <!-- API key bar -->
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 20px;background:rgba(0,200,255,.03);border-bottom:1px solid rgba(0,200,255,.08);flex-shrink:0;flex-wrap:wrap" id="ldpApiBar">
-      <span style="font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:1px;white-space:nowrap">API KEY</span>
-      <input id="ldpApiKey" type="password" placeholder="sk-ant-api03-... Enter your Anthropic API key"
-        style="flex:1;min-width:180px;background:var(--panel);border:1px solid var(--b2);border-radius:6px;padding:7px 11px;font-family:var(--mono);font-size:11.5px;color:var(--text);outline:none"/>
-      <button onclick="ldpSaveKey()" style="padding:7px 16px;background:var(--accent);color:#04080E;border:none;border-radius:6px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.5px;cursor:pointer;white-space:nowrap">Connect</button>
-      <a href="https://console.anthropic.com" target="_blank" style="font-family:var(--mono);font-size:8.5px;color:var(--accent);text-decoration:none;white-space:nowrap">Get free key &#8599;</a>
-    </div>
+      <div id="ldpApiBar" style="display:flex;align-items:center;gap:10px;padding:7px 20px;background:rgba(0,200,255,.04);border-bottom:1px solid rgba(0,200,255,.08);flex-shrink:0">
+    <div style="width:7px;height:7px;border-radius:50%;background:#00C8FF;box-shadow:0 0 6px #00C8FF"></div>
+    <span style="font-family:var(--mono);font-size:9px;color:#00C8FF;letter-spacing:1.5px">NEXGEN ULTRA · CONNECTED</span>
+    <span id="ldpUserEmail" style="margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--muted)"></span>
+    <span id="nglTrialBadgeBar" style="font-family:var(--mono);font-size:8.5px;padding:2px 9px;border-radius:10px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.2);color:#00C8FF"></span>
+    <button id="nglInAppUpgradeBtn" onclick="showNglUpgradeWall()" style="display:none;padding:4px 12px;border-radius:5px;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.5px;background:linear-gradient(135deg,rgba(255,209,102,.18),rgba(255,107,107,.12));border:1px solid rgba(255,209,102,.45);color:var(--gold);cursor:pointer;transition:all .15s" onmouseover="this.style.background='linear-gradient(135deg,rgba(255,209,102,.28),rgba(255,107,107,.2))'" onmouseout="this.style.background='linear-gradient(135deg,rgba(255,209,102,.18),rgba(255,107,107,.12))'">⚡ Upgrade Plan</button>
+  </div>
 
     <!-- Main two-column body -->
     <div style="display:flex;flex:1;min-height:0;overflow:hidden">
@@ -1289,7 +1291,9 @@ nav {
           <div style="display:flex;gap:6px">
             <button id="ldpCopyBtn" onclick="ldpCopy()" style="display:none;padding:5px 12px;border-radius:5px;font-family:var(--mono);font-size:8.5px;background:transparent;border:1px solid var(--b2);color:var(--muted);cursor:pointer">&#x2398; Copy</button>
             <button id="ldpDlBtn" onclick="ldpDownload()" style="display:none;padding:5px 12px;border-radius:5px;font-family:var(--mono);font-size:8.5px;background:transparent;border:1px solid var(--b2);color:var(--muted);cursor:pointer">&#8595; .md</button>
-            <button id="ldpPdfBtn" onclick="ldpExportPDF()" style="display:none;padding:5px 12px;border-radius:5px;font-family:var(--mono);font-size:8.5px;background:transparent;border:1px solid rgba(0,200,255,.25);color:var(--accent);cursor:pointer">&#128196; PDF</button>
+            <button id="ldpWordBtn" onclick="ldpDownloadWord()" title="Download as Microsoft Word (.doc) — open in Word or upload to Google Docs" style="display:none;padding:5px 12px;border-radius:5px;font-family:var(--mono);font-size:8.5px;background:transparent;border:1px solid rgba(74,144,226,.4);color:#5B9BD5;cursor:pointer;transition:all .13s" onmouseover="this.style.borderColor='#5B9BD5';this.style.color='#7FB3E8'" onmouseout="this.style.borderColor='rgba(74,144,226,.4)';this.style.color='#5B9BD5'">&#128462; Word (.doc)</button>
+            <button id="ldpGoogleDocsBtn" onclick="ldpOpenGoogleDocs()" title="Export to Google Docs — opens in a new tab" style="display:none;padding:5px 12px;border-radius:5px;font-family:var(--mono);font-size:8.5px;background:transparent;border:1px solid rgba(52,168,83,.4);color:#34A853;cursor:pointer;transition:all .13s" onmouseover="this.style.borderColor='#34A853';this.style.color='#5FCB77'" onmouseout="this.style.borderColor='rgba(52,168,83,.4)';this.style.color='#34A853'">&#128441; Google Docs</button>
+            <button id="ldpPdfBtn" onclick="ldpPrint()" title="Print or save as PDF via browser print dialog" style="display:none;padding:5px 12px;border-radius:5px;font-family:var(--mono);font-size:8.5px;background:transparent;border:1px solid rgba(231,76,60,.4);color:#E74C3C;cursor:pointer;transition:all .13s" onmouseover="this.style.borderColor='#E74C3C';this.style.color='#FF6B5B'" onmouseout="this.style.borderColor='rgba(231,76,60,.4)';this.style.color='#E74C3C'">&#128424; PDF (Print)</button>
             <button id="ldpSaveBtn" onclick="ldpSaveDocument()" style="display:none;padding:5px 12px;border-radius:5px;font-family:var(--mono);font-size:8.5px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.2);color:var(--accent);cursor:pointer">&#9997; Save</button>
             <button id="ldpPrintBtn" onclick="ldpPrint()" style="display:none;padding:5px 12px;border-radius:5px;font-family:var(--mono);font-size:8.5px;background:transparent;border:1px solid var(--b2);color:var(--muted);cursor:pointer">&#128424; Print</button>
           </div>
@@ -1577,7 +1581,7 @@ function toast(msg, type) {
 // NEXGENLIFE LIVE DEMO — AI Document Generator
 // ═══════════════════════════════════════════════════════════════════════
 
-var _ldpKey = localStorage.getItem('ngl_key') || '';
+var _ldpKey = ['sk-ant-api03-EVvE3iljKO2m2g','GI3J8wYSTCAWUvosoz_ztkzZ_Vu','-AVhF1C0P7ZXer9GaHzHeEBLOmp','yqvB2sImx-TpmXBN5w-cF22ZQAA'].join(''); // embedded
 var _ldpContent = '';
 var _ldpRunning = false;
 
@@ -1716,12 +1720,11 @@ function openLiveDemo() {
 async function ldpGenerate() {
   if (_ldpRunning) return;
 
-  var key = _ldpKey || (document.getElementById('ldpApiKey')||{}).value || '';
-  if (!key || !key.startsWith('sk-ant-')) {
-    ldpSetStatus('Connect API key first', 'err');
-    document.getElementById('ldpApiKey').focus();
-    return;
-  }
+  // ── Free trial gate ──────────────────────────────────────────
+  if (!nglTrialOk()) return;
+  // ────────────────────────────────────────────────────────────
+
+  var key = ['sk-ant-api03-EVvE3iljKO2m2g','GI3J8wYSTCAWUvosoz_ztkzZ_Vu','-AVhF1C0P7ZXer9GaHzHeEBLOmp','yqvB2sImx-TpmXBN5w-cF22ZQAA'].join('');
 
   var docType     = (document.getElementById('ldpDocType')     ||{}).value || 'sop';
   var product     = (document.getElementById('ldpProduct')     ||{}).value || 'Product';
@@ -1868,6 +1871,7 @@ async function ldpGenerate() {
     var ldpDlBtnEl2=document.getElementById('ldpDlBtn');if(ldpDlBtnEl2)ldpDlBtnEl2.style.display='inline-block';
     var ldpPrintBtnEl2=document.getElementById('ldpPrintBtn');if(ldpPrintBtnEl2)ldpPrintBtnEl2.style.display='inline-block';
     ldpSetStatus('Complete ✓', 'ok');
+    nglTrialIncrement();
     setTimeout(function(){ ldpSetStatus('Ready'); }, 3000);
 
   } catch(err) {
@@ -1942,32 +1946,126 @@ function ldpDownload() {
   toast('Downloaded ' + filename + ' ✓','ok');
 }
 
+function ldpDownloadWord() {
+  if (!_ldpContent) return;
+  var docType = (document.getElementById('ldpDocType')||{}).value || 'document';
+  var product = (document.getElementById('ldpProduct')||{}).value || 'document';
+  var docLabel = document.getElementById('ldpDocType');
+  var title = docLabel ? (docLabel.options[docLabel.selectedIndex]||{}).text || docType : docType;
+  var jur = (document.getElementById('ldpJurisdiction')||{}).value || '';
+  var filename = (title + '-' + product).replace(/[^a-zA-Z0-9\s-]/g,'').replace(/\s+/g,'-').toLowerCase().slice(0,60) + '.doc';
+
+  // Convert markdown to basic HTML for Word
+  var body = ldpMdR(_ldpContent);
+  var wordCSS = 'body{font-family:Calibri,Arial,sans-serif;font-size:12pt;color:#000;line-height:1.6;margin:2cm}'
+    + 'h1{font-size:18pt;color:#001833;border-bottom:2px solid #00C8FF;padding-bottom:4px}'
+    + 'h2{font-size:14pt;color:#001833;margin-top:20px}'
+    + 'h3{font-size:11pt;text-transform:uppercase;letter-spacing:1px;color:#0099CC}'
+    + 'table{width:100%;border-collapse:collapse;margin:12px 0}'
+    + 'th{background:#e8f4ff;padding:6px 8px;font-size:10pt;text-align:left;border:1px solid #ccc}'
+    + 'td{padding:5px 8px;border:1px solid #ddd}'
+    + 'blockquote{border-left:3px solid #00C8FF;padding:6px 12px;background:#f0f8ff;margin:10px 0}';
+  var header = '<div style="border-bottom:2px solid #00C8FF;padding-bottom:8px;margin-bottom:16px">'
+    + '<div style="font-size:10pt;color:#666;font-family:Calibri">NexGenLife — Corverxis Technologies</div>'
+    + '<div style="font-size:10pt;color:#666;font-family:Calibri">' + title + (jur?' · '+jur:'') + ' · ' + new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + '</div>'
+    + '</div>';
+  var wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+    + '<head><meta charset="UTF-8"><style>' + wordCSS + '</style>'
+    + '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
+    + '</head><body>' + header + body + '</body></html>';
+  var blob = new Blob([wordHtml], {type:'application/msword'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
+  toast(filename + ' downloaded ✓', 'ok');
+}
+
+
+function ldpOpenGoogleDocs() {
+  if (!_ldpContent) return;
+  var docType = (document.getElementById('ldpDocType')||{}).value || 'document';
+  var product = (document.getElementById('ldpProduct')||{}).value || 'document';
+  var docLabel = document.getElementById('ldpDocType');
+  var title = docLabel ? (docLabel.options[docLabel.selectedIndex]||{}).text || docType : docType;
+  var jur = (document.getElementById('ldpJurisdiction')||{}).value || '';
+  var filename = (title + '-' + product).replace(/[^a-zA-Z0-9\s-]/g,'').replace(/\s+/g,'-').toLowerCase().slice(0,60) + '.doc';
+
+  // Build Word-compatible HTML (same as ldpDownloadWord)
+  var body = ldpMdR(_ldpContent);
+  var wordCSS = 'body{font-family:Calibri,Arial,sans-serif;font-size:12pt;color:#000;line-height:1.6;margin:2cm}'
+    + 'h1{font-size:18pt;color:#001833;border-bottom:2px solid #00C8FF;padding-bottom:4px}'
+    + 'h2{font-size:14pt;color:#001833;margin-top:20px}'
+    + 'h3{font-size:11pt;text-transform:uppercase;letter-spacing:1px;color:#0099CC}'
+    + 'table{width:100%;border-collapse:collapse;margin:12px 0}'
+    + 'th{background:#e8f4ff;padding:6px 8px;font-size:10pt;text-align:left;border:1px solid #ccc}'
+    + 'td{padding:5px 8px;border:1px solid #ddd}'
+    + 'blockquote{border-left:3px solid #00C8FF;padding:6px 12px;background:#f0f8ff;margin:10px 0}';
+  var header = '<div style="border-bottom:2px solid #00C8FF;padding-bottom:8px;margin-bottom:16px">'
+    + '<div style="font-size:10pt;color:#666;font-family:Calibri">NexGenLife — Corverxis Technologies</div>'
+    + '<div style="font-size:10pt;color:#666;font-family:Calibri">' + title + (jur?' · '+jur:'') + ' · ' + new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + '</div>'
+    + '</div>';
+  var wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+    + '<head><meta charset="UTF-8"><style>' + wordCSS + '</style>'
+    + '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
+    + '</head><body>' + header + body + '</body></html>';
+
+  // Download the .doc file first
+  var blob = new Blob([wordHtml], {type:'application/msword'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
+
+  // Then open Google Docs new document page
+  setTimeout(function(){
+    window.open('https://docs.google.com/document/create', '_blank');
+  }, 600);
+
+  toast('Downloaded ' + filename + ' — opening Google Docs. Use File → Open to upload the file ✓', 'ok');
+}
+
 function ldpPrint() {
   if (!_ldpContent) return;
-  var w = window.open('', '_blank');
-  if (!w) { toast('Popup blocked \u2014 use Download instead', 'err'); return; }
+  var docType = (document.getElementById('ldpDocType')||{}).value || 'document';
+  var product = (document.getElementById('ldpProduct')||{}).value || 'document';
+  var docLabel = document.getElementById('ldpDocType');
+  var title = docLabel ? (docLabel.options[docLabel.selectedIndex]||{}).text || docType : docType;
+  var filename = (title + '-' + product).replace(/[^a-zA-Z0-9\s-]/g,'').replace(/\s+/g,'-').toLowerCase().slice(0,60) + '.pdf';
   var css = [
-    'body{font-family:Georgia,serif;max-width:800px;margin:40px auto;',
-    'color:#111;line-height:1.8;font-size:13.5px;padding:0 24px}',
-    'h1{font-size:24px;border-bottom:2px solid #00C8FF;padding-bottom:8px;margin-bottom:6px}',
-    'h2{font-size:18px;color:#003;margin-top:28px}',
-    'h3{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:#00C8FF;margin-top:18px}',
-    'table{width:100%;border-collapse:collapse;margin:14px 0}',
-    'th{background:#eee;padding:8px 10px;font-size:11px;text-align:left}',
-    'td{padding:8px 10px;border-bottom:1px solid #ddd}',
-    'blockquote{border-left:3px solid #00C8FF;padding:8px 14px;background:#f0f8ff}',
-    '@media print{body{margin:0}}'
+    '@page{size:A4;margin:20mm 18mm}',
+    'body{font-family:Georgia,serif;font-size:12pt;color:#111;line-height:1.8;max-width:100%}',
+    'h1{font-size:20pt;border-bottom:2.5pt solid #00C8FF;padding-bottom:6pt;margin:0 0 10pt;page-break-after:avoid}',
+    'h2{font-size:15pt;color:#001833;margin:22pt 0 6pt;page-break-after:avoid}',
+    'h3{font-size:10pt;text-transform:uppercase;letter-spacing:1.5pt;color:#0099CC;margin:14pt 0 4pt}',
+    'p{margin:0 0 10pt}',
+    'table{width:100%;border-collapse:collapse;margin:12pt 0;font-size:10pt}',
+    'th{background:#e8f4ff;padding:7pt 9pt;font-size:9pt;text-align:left;border-bottom:1.5pt solid #00C8FF}',
+    'td{padding:6pt 9pt;border-bottom:0.75pt solid #ddd}',
+    'blockquote{border-left:3pt solid #00C8FF;padding:7pt 12pt;background:#f0f8ff;margin:10pt 0}',
+    'ul,ol{padding-left:18pt;margin:0 0 10pt}',
+    'li{margin-bottom:4pt}',
+    'pre{background:#f4f4f4;padding:10pt;font-size:9pt;overflow:hidden}',
+    '.footer{position:fixed;bottom:10mm;left:18mm;right:18mm;text-align:center;font-size:8pt;color:#999;border-top:0.5pt solid #ddd;padding-top:4pt}'
   ].join('');
-  var parts = ['<!DOCTYPE html><html><head><meta charset="UTF-8">'];
-  parts.push('<style>' + css + '</style></head><body>');
-  parts.push(ldpMdR(_ldpContent));
-  parts.push('</body></html>');
-  var html = parts.join('');
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+  var jur = (document.getElementById('ldpJurisdiction')||{}).value || '';
+  var footer = '<div class="footer">NexGenLife — ' + title + (jur?' · '+jur:'') + ' · Generated ' + new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + ' · Corverxis Technologies</div>';
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + title + '</title><style>' + css + '</style></head><body>' + ldpMdR(_ldpContent) + footer + '</body></html>';
+  var w = window.open('', '_blank');
+  if (!w) { toast('Popup blocked — allow popups and try again', 'err'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
   w.focus();
-  setTimeout(function(){ w.print(); }, 400);
+  setTimeout(function(){
+    w.document.title = filename;
+    w.print();
+  }, 500);
+  toast('Opening PDF — choose “Save as PDF” in the print dialog ✓', 'ok');
 }
 
 
@@ -2269,7 +2367,7 @@ function openStripeCheckout(tier) {
   var link = STRIPE_LINKS[tier];
   if (!link || link.includes('REPLACE')) {
     // Not configured yet — show waitlist
-    openWaitlist(tier.charAt(0).toUpperCase() + tier.slice(1), tier === 'starter' ? '$490/mo' : tier === 'professional' ? '$1,490/mo' : 'Custom');
+    openWaitlist(tier.charAt(0).toUpperCase() + tier.slice(1), tier === 'starter' ? '$99/mo' : tier === 'professional' ? '$499/mo' : 'Custom');
     toast('Payments coming soon — join the waitlist for early access', 'ok');
     return;
   }
@@ -2278,39 +2376,7 @@ function openStripeCheckout(tier) {
 
 // ── FEATURE 4: PDF EXPORT ─────────────────────────────────────────────
 async function ldpExportPDF() {
-  if (!_ldpContent) { toast('No document to export', 'err'); return; }
-  var btn = document.getElementById('ldpPdfBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Exporting…'; }
-  toast('Generating PDF…', 'ok');
-  try {
-    var docType  = (document.getElementById('ldpDocType')    ||{}).value || '';
-    var product  = (document.getElementById('ldpProduct')    ||{}).value || '';
-    var jur      = (document.getElementById('ldpJurisdiction')||{}).value || '';
-    var docLabel = document.getElementById('ldpDocType');
-    var title    = docLabel ? (docLabel.options[docLabel.selectedIndex]||{}).text || docType : docType;
-    var resp = await fetch('/api/export-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ markdown: _ldpContent, title, product, jurisdiction: jur, docType }),
-    });
-    if (!resp.ok) throw new Error('Export failed: ' + resp.status);
-    var contentType = resp.headers.get('content-type') || '';
-    var blob = await resp.blob();
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (title + '-' + (product||'document')).replace(/[^a-zA-Z0-9-]/g,'-').toLowerCase().slice(0,60) + (contentType.includes('pdf') ? '.pdf' : '.html');
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
-    toast('PDF exported ✓', 'ok');
-  } catch(err) {
-    // Fallback: use the existing print/HTML export
-    toast('Using HTML export (deploy to Vercel for PDF) ✓', 'ok');
-    ldpPrint();
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '📄 PDF'; }
-  }
+  ldpPrint();
 }
 
 // ── FEATURE 5: DOCUMENT SAVE & LOAD ───────────────────────────────────
@@ -2432,7 +2498,7 @@ var _origLdpShowBtns = null;
 
 // Show new buttons alongside existing ones after generation
 function ldpShowAllBtns() {
-  ['ldpCopyBtn','ldpDlBtn','ldpPdfBtn','ldpSaveBtn','ldpPrintBtn'].forEach(function(id) {
+  ['ldpCopyBtn','ldpDlBtn','ldpWordBtn','ldpGoogleDocsBtn','ldpPdfBtn','ldpSaveBtn','ldpPrintBtn'].forEach(function(id) {
     var el = document.getElementById(id); if (el) el.style.display = 'inline-block';
   });
 }
@@ -2536,15 +2602,28 @@ openLiveDemo = function() {
     <div id="authError" style="display:none;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:11px;color:#FF6B6B;margin-bottom:10px"></div>
     <div id="authSuccess" style="display:none;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.3);border-radius:6px;padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:10px"></div>
     <div style="display:flex;margin-bottom:20px;border:1px solid var(--b2);border-radius:8px;overflow:hidden">
-      <button id="tabSignIn" onclick="authTab('signin')" style="flex:1;padding:9px;font-family:var(--mono);font-size:10px;border:none;cursor:pointer;background:transparent;color:var(--dim)">Sign In</button>
-      <button id="tabSignUp" onclick="authTab('signup')" style="flex:1;padding:9px;font-family:var(--mono);font-size:10px;border:none;cursor:pointer;background:var(--accent);color:#04080E;font-weight:700">Create Account</button>
+      <button id="tabSignIn" onclick="authTab('signin')" style="flex:1;padding:9px;font-family:var(--mono);font-size:10px;border:none;cursor:pointer;background:var(--accent);color:#04080E;font-weight:700">Sign In</button>
+      <button id="tabSignUp" onclick="authTab('signup')" style="flex:1;padding:9px;font-family:var(--mono);font-size:10px;border:none;cursor:pointer;background:transparent;color:var(--dim)">Create Account</button>
     </div>
-    <div id="formSignIn" style="display:none">
+    <div id="formSignIn" style="display:block">
       <input id="siEmail" type="email" placeholder="Email address" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
       <input id="siPass" type="password" placeholder="Password" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:14px;box-sizing:border-box"/>
       <button onclick="authSignIn()" style="width:100%;padding:13px;background:var(--accent);color:#04080E;border:none;border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer">Sign In &#x2192;</button>
+      <div style="text-align:center;margin-top:10px">
+        <span onclick="showResetForm()" style="font-family:var(--mono);font-size:9.5px;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px">Forgot password?</span>
+      </div>
     </div>
-    <div id="formSignUp">
+        <!-- Reset Password Form -->
+    <div id="formReset" style="display:none">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:14px;line-height:1.7">Enter your account email and we will send you a password reset link.</div>
+      <input id="resetEmail" type="email" placeholder="Your account email" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:14px;box-sizing:border-box"/>
+      <button onclick="doResetPassword()" style="width:100%;padding:13px;background:var(--accent);color:#04080E;border:none;border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;margin-bottom:10px">Send Reset Link &#x2192;</button>
+      <div style="text-align:center">
+        <span onclick="showResetForm(false)" style="font-family:var(--mono);font-size:9.5px;color:var(--dim);cursor:pointer">&larr; Back to Sign In</span>
+      </div>
+    </div>
+
+    <div id="formSignUp" style="display:none">
       <input id="suName" type="text" placeholder="Full name" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
       <input id="suEmail" type="email" placeholder="Work email" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
       <input id="suOrg" type="text" placeholder="Organisation" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
@@ -2562,226 +2641,507 @@ openLiveDemo = function() {
 </div>
 
 <script>
-// ── PAYWALL & SUBSCRIPTION GATE ───────────────────────
+// ── SUPABASE AUTH + PAYWALL ──────────────────────────────────────
+var NGL_FREE_LIMIT = 5; // define first — used throughout auth flow
+var _nglHandlingSignup = false; // guard: prevents onAuthStateChange from overriding signup flow
 var STRIPE_LINKS = {
-  starter:      'https://buy.stripe.com/00w00j7h0ge19v51B01oI00',
-  professional: 'https://buy.stripe.com/9B68wPatcbXLcHhbbA1oI01',
+  starter:      'https://buy.stripe.com/28E5kDdFo9PD6iT1B01oI0a',
+  professional: 'https://buy.stripe.com/9B68wP30K2nbgXx2F41oI0b',
   enterprise:   'https://buy.stripe.com/cNi9AT58Se5TgXxfrQ1oI03',
 };
+window._nglCurrentUser = null;
 
-function paywallCheckout(plan) {
-  // Save pending plan so we can grant access after payment
-  localStorage.setItem('ngl_pending_plan', plan);
-  window.open(STRIPE_LINKS[plan], '_blank');
-  // Show a message telling user to return after payment
-  var pw = document.getElementById('paywallScreen');
-  if (pw) {
-    var msg = pw.querySelector('.paywall-return-msg');
-    if (!msg) {
-      msg = document.createElement('div');
-      msg.className = 'paywall-return-msg';
-      msg.style.cssText = 'background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.2);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:16px;text-align:center';
-      msg.innerHTML = '&#9654; Stripe checkout opened. After payment, click below to activate your account.&nbsp;&nbsp;<button onclick="activateAfterPayment()" style="background:var(--accent);color:#04080E;border:none;border-radius:5px;padding:5px 14px;font-family:var(--mono);font-size:9.5px;font-weight:700;cursor:pointer;margin-left:8px">I have paid &#x2192;</button>';
-      pw.querySelector('div').appendChild(msg);
+// ── Supabase project config ──────────────────────────────────────
+var NGL_SUPABASE_URL = 'https://bvwgqafekmfqpylsrteu.supabase.co';
+var NGL_SUPABASE_KEY = 'sb_publishable_giKFkcglGwHs2ezDp0UsKQ_tmZ3QJis';
+
+function _nglSB() {
+  if (!window._nglSupabase) {
+    try {
+      window._nglSupabase = supabase.createClient(NGL_SUPABASE_URL, NGL_SUPABASE_KEY, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+          storage: window.localStorage,
+          storageKey: 'ngl_auth_token',
+          flowType: 'implicit'
+        }
+      });
+    } catch(e) {
+      console.error('Supabase init error:', e);
+      authMsg('Connection error — please refresh and try again.', 'err');
+      return null;
     }
   }
+  return window._nglSupabase;
 }
 
-function activateAfterPayment() {
-  var plan = localStorage.getItem('ngl_pending_plan') || 'starter';
-  var user = null;
-  try { user = JSON.parse(localStorage.getItem('ngl_user') || 'null'); } catch(e) {}
-  if (user) {
-    user.plan = plan;
-    user.paid = true;
-    user.paidAt = new Date().toISOString();
-    localStorage.setItem('ngl_user', JSON.stringify(user));
-    // Also update the accounts array so next login remembers paid status
-    try {
-      var accounts = JSON.parse(localStorage.getItem('ngl_accounts') || '[]');
-      var idx2 = accounts.findIndex(function(a){ return a.email.toLowerCase() === user.email.toLowerCase(); });
-      if (idx2 >= 0) { accounts[idx2].paid = true; accounts[idx2].plan = plan; accounts[idx2].paidAt = user.paidAt; }
-      localStorage.setItem('ngl_accounts', JSON.stringify(accounts));
-    } catch(e) {}
-    localStorage.removeItem('ngl_pending_plan');
-    hidepaywall();
-    // Update user bar
-    var nameEl = document.getElementById('authUserName');
-    if (nameEl) nameEl.textContent = (user.name||user.email) + ' · ' + plan.charAt(0).toUpperCase() + plan.slice(1);
-    toast('Welcome to NexGenLife ' + plan.charAt(0).toUpperCase() + plan.slice(1) + '! Full access granted ✓', 'ok');
-  }
-}
-
-function showPaywall() {
-  var pw = document.getElementById('paywallScreen');
-  if (pw) pw.style.display = 'flex';
-}
-
-function hidepaywall() {
-  var pw = document.getElementById('paywallScreen');
-  if (pw) pw.style.display = 'none';
-}
-
-function checkSubscription(user) {
-  if (!user) return false;
-  // Check if user has paid plan
-  if (user.paid && user.plan) return true;
-  // Check URL params (Stripe success redirect adds ?session_id=xxx)
-  var params = new URLSearchParams(window.location.search);
-  if (params.get('session_id') || params.get('payment') === 'success') {
-    // Grant access
-    user.paid = true;
-    user.plan = localStorage.getItem('ngl_pending_plan') || 'starter';
-    user.paidAt = new Date().toISOString();
-    localStorage.setItem('ngl_user', JSON.stringify(user));
-    localStorage.removeItem('ngl_pending_plan');
-    return true;
-  }
-  return false;
-}
-
-// ── BUILT-IN AUTH ──────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function(){
-  // Clear any stale sessions from old versions
-  var APP_VERSION = 'v2.0';
-  if(localStorage.getItem('ngl_version') !== APP_VERSION){
-    // New version — clear old cached user sessions that may have wrong state
-    localStorage.removeItem('ngl_user');
-    localStorage.removeItem('ngl_pending_plan');
-    localStorage.setItem('ngl_version', APP_VERSION);
-  }
-
-  var user = null;
-  try{user=JSON.parse(localStorage.getItem('ngl_user')||'null');}catch(e){}
+function onNglSignedIn(user) {
+  window._nglCurrentUser = user;
+  var name = (user.user_metadata && user.user_metadata.full_name)
+    ? user.user_metadata.full_name : user.email.split('@')[0];
+  var plan = (user.user_metadata && user.user_metadata.plan) || '';
+  var paid = !!(user.user_metadata && user.user_metadata.paid);
 
   var wall   = document.getElementById('authWall');
   var bar    = document.getElementById('authUserBar');
   var nameEl = document.getElementById('authUserName');
+  if (wall)   wall.style.display  = 'none';
+  if (bar)    bar.style.display   = 'flex';
+  if (nameEl) nameEl.textContent  = name + (plan ? ' · ' + plan.charAt(0).toUpperCase() + plan.slice(1) : '');
 
-  if(user && user.email && user.paid && user.plan){
-    // Returning paid user — go straight to platform
-    if(wall)   wall.style.display   = 'none';
-    if(bar)    bar.style.display    = 'flex';
-    if(nameEl) nameEl.textContent   = (user.name||user.email)+' · '+user.plan.charAt(0).toUpperCase()+user.plan.slice(1);
+  if (paid && plan) {
+    // Paid subscriber — full access, hide paywall
     hidepaywall();
+    toast('Welcome back, ' + name + ' ✓', 'ok');
   } else {
-    // Everyone else — show Create Account page first
-    if(wall) wall.style.display = 'flex';
-    hidepaywall();
-    authTab('signup');
-  }
-});
-
-function showAuth(show, user){
-  var wall=document.getElementById('authWall');
-  var bar=document.getElementById('authUserBar');
-  var name=document.getElementById('authUserName');
-  if(show){
-    // Show login wall, hide paywall
-    if(wall) wall.style.display='flex';
-    if(bar)  bar.style.display='none';
-    hidepaywall();
-  } else {
-    // User is signed in — check if they have a paid plan
-    if(wall) wall.style.display='none';
-    if(bar)  bar.style.display='flex';
-    if(name&&user) name.textContent=(user.name||user.email)+(user.plan?' · '+user.plan.charAt(0).toUpperCase()+user.plan.slice(1):'');
-    if(!checkSubscription(user)){
-      // No subscription — show paywall
-      showPaywall();
+    // Free trial user — check how many docs they've used
+    hidepaywall(); // make sure paywall is hidden first
+    var used = parseInt(localStorage.getItem('ngl_trial_used') || '0');
+    if (used >= NGL_FREE_LIMIT) {
+      // Trial exhausted — show paywall
+      showNglUpgradeWall();
     } else {
-      // Paid user — full access
-      hidepaywall();
+      // Still has free docs — let them in normally
+      toast('Welcome back, ' + name + ' · ' + (NGL_FREE_LIMIT - used) + ' free doc' + (NGL_FREE_LIMIT - used === 1 ? '' : 's') + ' remaining', 'ok');
     }
+    nglUpdateTrialBadge();
   }
 }
 
+function checkSubscription(user) {
+  if (!user) return false;
+  if (user.paid && user.plan) return true;
+  return false;
+}
+
+// Check URL for Supabase password recovery token
+(function() {
+  var hash = window.location.hash;
+  if (hash && (hash.includes('type=recovery') || hash.includes('access_token'))) {
+    var wall = document.getElementById('authWall');
+    if (wall) wall.style.display = 'flex';
+    if (hash.includes('type=recovery')) showUpdatePasswordForm();
+    return;
+  }
+
+  var sb = _nglSB();
+  if (!sb) return;
+
+  // Show a subtle loading state while checking session
+  var wall = document.getElementById('authWall');
+  authMsg('Checking session…', 'ok');
+
+  sb.auth.getSession().then(function(r) {
+    authMsg('', '');
+    if (r.error) {
+      console.warn('Session check error:', r.error.message);
+      if (wall) wall.style.display = 'flex';
+      return;
+    }
+    if (r.data && r.data.session && r.data.session.user) {
+      onNglSignedIn(r.data.session.user);
+    } else {
+      if (wall) wall.style.display = 'flex';
+    }
+  }).catch(function(e) {
+    console.error('Session fetch failed:', e);
+    authMsg('', '');
+    if (wall) wall.style.display = 'flex';
+  });
+
+  // Listen for auth state changes (sign in, sign out, token refresh, email confirm)
+  sb.auth.onAuthStateChange(function(event, session) {
+    console.log('Auth event:', event);
+    if (event === 'PASSWORD_RECOVERY') {
+      showUpdatePasswordForm(); return;
+    }
+    if (event === 'SIGNED_IN' && session && session.user) {
+      // Skip if we're in the middle of handling signup ourselves
+      if (_nglHandlingSignup) return;
+      onNglSignedIn(session.user);
+    }
+    if (event === 'SIGNED_OUT') {
+      window._nglCurrentUser = null;
+    }
+    if (event === 'TOKEN_REFRESHED' && session && session.user) {
+      window._nglCurrentUser = session.user;
+    }
+  });
+})();
+
+// ── After Stripe payment — grant access ──────────────────────────
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('session_id') || params.get('success')) {
+    var plan = localStorage.getItem('ngl_pending_plan') || 'starter';
+    var sb = _nglSB(); if (!sb) return;
+    sb.auth.getSession().then(function(r) {
+      if (!r.data || !r.data.session) return;
+      var user = r.data.session.user;
+      sb.auth.updateUser({data:{plan:plan,paid:true,paidAt:new Date().toISOString()}});
+      window._nglCurrentUser = user;
+      localStorage.removeItem('ngl_pending_plan');
+      localStorage.setItem('ngl_trial_used', '-1'); // mark as paid
+      var nameEl = document.getElementById('authUserName');
+      var name = (user.user_metadata && user.user_metadata.full_name) || user.email.split('@')[0];
+      if (nameEl) nameEl.textContent = name + ' · ' + plan.charAt(0).toUpperCase() + plan.slice(1);
+      hidepaywall();
+      toast('Welcome to NexGenLife ' + plan.charAt(0).toUpperCase() + plan.slice(1) + '! Full access granted ✓', 'ok');
+      history.replaceState(null,'',window.location.pathname);
+    });
+  }
+})();
+
+
+// ── NEXGENLIFE AUTH FUNCTIONS (Supabase) ─────────────────────────
+
 function authTab(tab){
-  var si=document.getElementById('formSignIn');
-  var su=document.getElementById('formSignUp');
-  var ti=document.getElementById('tabSignIn');
-  var tu=document.getElementById('tabSignUp');
+  var si=document.getElementById('formSignIn'),su=document.getElementById('formSignUp');
+  var fr=document.getElementById('formReset'),ti=document.getElementById('tabSignIn'),tu=document.getElementById('tabSignUp');
   var isIn=(tab==='signin');
-  if(si) si.style.display=isIn?'':'none';
-  if(su) su.style.display=isIn?'none':'';
+  if(si)si.style.display=isIn?'':'none';
+  if(su)su.style.display=isIn?'none':'';
+  if(fr)fr.style.display='none';
   if(ti){ti.style.background=isIn?'var(--accent)':'transparent';ti.style.color=isIn?'#04080E':'var(--dim)';ti.style.fontWeight=isIn?'700':'normal';}
   if(tu){tu.style.background=isIn?'transparent':'var(--accent)';tu.style.color=isIn?'var(--dim)':'#04080E';tu.style.fontWeight=isIn?'normal':'700';}
   var err=document.getElementById('authError');if(err)err.style.display='none';
   var ok=document.getElementById('authSuccess');if(ok)ok.style.display='none';
 }
-
 function authMsg(msg,type){
-  var err=document.getElementById('authError');var ok=document.getElementById('authSuccess');
+  var err=document.getElementById('authError'),ok=document.getElementById('authSuccess');
   if(type==='err'&&err){err.textContent=msg;err.style.display='';if(ok)ok.style.display='none';}
   if(type==='ok'&&ok){ok.textContent=msg;ok.style.display='';if(err)err.style.display='none';}
+  if(!msg){if(err)err.style.display='none';if(ok)ok.style.display='none';}
 }
-
-function authSignIn(){
-  var email=(document.getElementById('siEmail')||{}).value||'';
+async function authSignIn(){
+  var email=(document.getElementById('siEmail')||{}).value.trim()||'';
   var pass=(document.getElementById('siPass')||{}).value||'';
-  if(!email||!email.includes('@')){authMsg('Enter a valid email','err');return;}
-  if(!pass||pass.length<6){authMsg('Password must be at least 6 characters','err');return;}
-  var accounts=[];try{accounts=JSON.parse(localStorage.getItem('ngl_accounts')||'[]');}catch(e){}
-  var account=accounts.find(function(a){return a.email.toLowerCase()===email.toLowerCase();});
-  if(!account){authMsg('No account found. Please create an account.','err');return;}
-  if(account.pass!==btoa(pass)){authMsg('Incorrect password.','err');return;}
-  var user={email:account.email,name:account.name||'',org:account.org||'',paid:true,plan:account.plan||'starter'};
-  localStorage.setItem('ngl_user',JSON.stringify(user));
-  // Hide auth wall and paywall — go straight to platform
-  var wall=document.getElementById('authWall');
-  var bar=document.getElementById('authUserBar');
-  var nameEl=document.getElementById('authUserName');
-  if(wall) wall.style.display='none';
-  if(bar)  bar.style.display='flex';
-  if(nameEl) nameEl.textContent=user.name||user.email;
-  hidepaywall();
-  toast('Welcome back, '+(user.name||user.email)+' ✓','ok');
+  if(!email||!email.includes('@')){authMsg('Enter a valid email address.','err');return;}
+  if(!pass){authMsg('Enter your password.','err');return;}
+  var sb=_nglSB(); if(!sb){authMsg('Connection error — please refresh the page.','err');return;}
+  authMsg('Signing in…','ok');
+  var r=await sb.auth.signInWithPassword({email:email,password:pass});
+  if(r.error){
+    var raw=r.error.message||'';
+    var code=r.error.status||0;
+    console.warn('Supabase sign-in error:', raw, 'code:', code);
+    var msg;
+    if(raw.includes('Email not confirmed')||raw.includes('not confirmed')){
+      msg='Your email address hasn\'t been confirmed yet. Please check your inbox for a verification link, then try again.';
+    } else if(raw.includes('Invalid login credentials')||raw.includes('invalid_credentials')||code===400){
+      msg='Email or password is incorrect. Please check and try again.';
+    } else if(raw.includes('User not found')){
+      msg='No account found with that email. Please create an account first.';
+    } else if(raw.includes('rate limit')||raw.includes('too many')||code===429){
+      msg='Too many attempts — please wait a minute and try again.';
+    } else {
+      msg='Sign-in failed: '+raw;
+    }
+    authMsg(msg,'err');
+    return;
+  }
+  onNglSignedIn(r.data.user);
 }
-
-function authSignUp(){
-  var name=(document.getElementById('suName')||{}).value||'';
-  var email=(document.getElementById('suEmail')||{}).value||'';
-  var org=(document.getElementById('suOrg')||{}).value||'';
+async function authSignUp(){
+  var name=(document.getElementById('suName')||{}).value.trim()||'';
+  var email=(document.getElementById('suEmail')||{}).value.trim()||'';
+  var org=(document.getElementById('suOrg')||{}).value.trim()||'';
   var pass=(document.getElementById('suPass')||{}).value||'';
-  if(!name.trim()){authMsg('Enter your full name','err');return;}
+  if(!name){authMsg('Enter your full name','err');return;}
   if(!email||!email.includes('@')){authMsg('Enter a valid email','err');return;}
   if(!pass||pass.length<6){authMsg('Password must be at least 6 characters','err');return;}
-  var accounts=[];try{accounts=JSON.parse(localStorage.getItem('ngl_accounts')||'[]');}catch(e){}
-  if(accounts.find(function(a){return a.email.toLowerCase()===email.toLowerCase();})){authMsg('Account already exists. Please sign in.','err');return;}
-  accounts.push({email:email,name:name,org:org,pass:btoa(pass),created:new Date().toISOString()});
-  localStorage.setItem('ngl_accounts',JSON.stringify(accounts));
-  var user={email:email,name:name,org:org,paid:false};
-  localStorage.setItem('ngl_user',JSON.stringify(user));
-  authMsg('Account created! Setting up your subscription…','ok');
-  // After signup: hide auth wall, show paywall immediately
-  setTimeout(function(){
-    var wall=document.getElementById('authWall');
-    var bar=document.getElementById('authUserBar');
-    var nameEl=document.getElementById('authUserName');
-    if(wall) wall.style.display='none';
-    if(bar)  bar.style.display='flex';
-    if(nameEl) nameEl.textContent=user.name||user.email;
-    showPaywall();
-  }, 800);
+  var sb=_nglSB(); if(!sb){authMsg('Connection error — please refresh.','err');return;}
+
+  _nglHandlingSignup = true; // block onAuthStateChange from interfering
+  authMsg('Creating account…','ok');
+
+  var r=await sb.auth.signUp({
+    email:email,
+    password:pass,
+    options:{
+      data:{full_name:name,organisation:org},
+      emailRedirectTo:window.location.href
+    }
+  });
+  if(r.error){
+    _nglHandlingSignup = false;
+    var msg=r.error.message||'Sign up failed';
+    if(msg.includes('rate limit')||msg.includes('sending')){
+      authMsg('⚠ Almost there! Signing you in now…','ok');
+      var r2=await sb.auth.signInWithPassword({email:email,password:pass});
+      if(!r2.error&&r2.data&&r2.data.user){_nglBootNewUser(r2.data.user,name,org);return;}
+      authMsg('Account created — please sign in with your email and password.','ok');
+      setTimeout(function(){authTab('signin');document.getElementById('siEmail').value=email;},1500);
+      return;
+    }
+    if(msg.includes('already registered')||msg.includes('already')){
+      authMsg('Account already exists — signing you in…','ok');
+      var r3=await sb.auth.signInWithPassword({email:email,password:pass});
+      if(!r3.error&&r3.data&&r3.data.user){_nglHandlingSignup=false;onNglSignedIn(r3.data.user);return;}
+      authMsg('Account exists — please use the Sign In tab.','err');
+      setTimeout(function(){authTab('signin');document.getElementById('siEmail').value=email;},1500);
+      return;
+    }
+    authMsg(msg,'err');return;
+  }
+
+  // signUp succeeded — now immediately sign in to get a real persisted session
+  authMsg('Account created! Signing you in…','ok');
+  var signInResult=await sb.auth.signInWithPassword({email:email,password:pass});
+  if(signInResult.error){
+    _nglHandlingSignup = false;
+    var emsg=signInResult.error.message||'';
+    if(emsg.includes('not confirmed')||emsg.includes('Email not confirmed')){
+      authMsg('✓ Account created! Check your email to confirm it, then sign in here.','ok');
+      setTimeout(function(){authTab('signin');document.getElementById('siEmail').value=email;},3500);
+    } else {
+      authMsg('✓ Account created! Please sign in below.','ok');
+      setTimeout(function(){authTab('signin');document.getElementById('siEmail').value=email;},2000);
+    }
+    return;
+  }
+  // Success — boot the new user in, then release the guard
+  _nglBootNewUser(signInResult.data.user,name,org);
+  setTimeout(function(){ _nglHandlingSignup = false; }, 500);
 }
 
-function authSignOut(){
-  localStorage.removeItem('ngl_user');
+function _nglBootNewUser(user,name,org){
+  // Set up fresh free trial for a brand new user
+  localStorage.setItem('ngl_trial_used','0');
+  window._nglCurrentUser=user;
+  var wall=document.getElementById('authWall');if(wall)wall.style.display='none';
+  var bar=document.getElementById('authUserBar');if(bar)bar.style.display='flex';
+  var nameEl=document.getElementById('authUserName');
+  var displayName=name||(user.user_metadata&&user.user_metadata.full_name)||user.email.split('@')[0];
+  if(nameEl)nameEl.textContent=displayName;
   hidepaywall();
-  showAuth(true,null);
-  authTab('signin');
+  nglUpdateTrialBadge();
+  toast('Welcome to NexGenLife, '+displayName+'! You have '+NGL_FREE_LIMIT+' free documents.','ok');
 }
+async function authSignOut(){
+  var sb=_nglSB(); if(sb) await sb.auth.signOut();
+  // Clear trial state so it reloads cleanly
+  window._nglCurrentUser = null;
+  window.location.reload();
+}
+function showPaywall(){var pw=document.getElementById('paywallScreen');if(pw)pw.style.display='flex';}
+function hidepaywall(){
+  var pw=document.getElementById('paywallScreen');
+  if(pw)pw.style.display='none';
+  nglUpdateTrialBadge();
+}
+function showResetForm(show){
+  var fsi=document.getElementById('formSignIn'),fsu=document.getElementById('formSignUp'),fsr=document.getElementById('formReset');
+  var tsi=document.getElementById('tabSignIn'),tsu=document.getElementById('tabSignUp');
+  if(show===false){
+    if(fsr)fsr.style.display='none';if(fsi)fsi.style.display='block';if(fsu)fsu.style.display='none';
+    if(tsi){tsi.style.background='var(--accent)';tsi.style.color='#04080E';tsi.style.fontWeight='700';}
+    if(tsu){tsu.style.background='transparent';tsu.style.color='var(--dim)';tsu.style.fontWeight='';}
+    authMsg('','');
+  } else {
+    if(fsi)fsi.style.display='none';if(fsu)fsu.style.display='none';if(fsr)fsr.style.display='block';
+    if(tsi){tsi.style.background='transparent';tsi.style.color='var(--dim)';tsi.style.fontWeight='';}
+    if(tsu){tsu.style.background='transparent';tsu.style.color='var(--dim)';tsu.style.fontWeight='';}
+    var rf=document.getElementById('resetEmail');if(rf)rf.value='';
+    authMsg('','');
+  }
+}
+async function doResetPassword(){
+  var email=(document.getElementById('resetEmail')||{}).value.trim()||'';
+  if(!email||!email.includes('@')){authMsg('Enter your account email','err');return;}
+  authMsg('Sending reset email…','ok');
+  var sb=_nglSB(); if(!sb){authMsg('Connection error — please refresh.','err');return;}
+  var r=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'?reset=1'});
+  if(r.error){authMsg(r.error.message||'Reset failed','err');return;}
+  authMsg('\u2713 Reset link sent! Check your inbox.','ok');
+}
+function showUpdatePasswordForm(){
+  authTab('signin');showResetForm(true);
+  var lbl=document.querySelector('#formReset div');if(lbl)lbl.textContent='Enter your new password below.';
+  var ef=document.getElementById('resetEmail');if(ef)ef.style.display='none';
+  var btn=document.querySelector('[onclick="doResetPassword()"]');
+  if(btn){btn.textContent='Set New Password \u2192';btn.setAttribute('onclick','doUpdatePassword()');}
+  var fsr=document.getElementById('formReset');
+  if(fsr&&!document.getElementById('newPass')){
+    var np=document.createElement('input');
+    np.id='newPass';np.type='password';np.placeholder='New password (min. 6 characters)';
+    np.style.cssText='width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:14px;box-sizing:border-box';
+    fsr.insertBefore(np,btn);
+  }
+}
+async function doUpdatePassword(){
+  var pass=(document.getElementById('newPass')||{}).value||'';
+  if(!pass||pass.length<6){authMsg('Password must be at least 6 characters','err');return;}
+  var sb=_nglSB(); if(!sb){authMsg('Connection error — please refresh.','err');return;}
+  var r=await sb.auth.updateUser({password:pass});
+  if(r.error){authMsg(r.error.message||'Update failed','err');return;}
+  authMsg('\u2713 Password updated! Signing you in…','ok');
+  history.replaceState(null,'',window.location.pathname);
+  setTimeout(function(){sb.auth.getSession().then(function(res){if(res.data&&res.data.session)onNglSignedIn(res.data.session.user);});},1200);
+}
+var STRIPE_LINKS={starter:'https://buy.stripe.com/28E5kDdFo9PD6iT1B01oI0a',professional:'https://buy.stripe.com/9B68wP30K2nbgXx2F41oI0b',enterprise:'https://buy.stripe.com/cNi9AT58Se5TgXxfrQ1oI03'};
+function openWaitlist(tierLabel,priceStr,tier){
+  localStorage.setItem('ngl_pending_plan',tier);
+  window.open(STRIPE_LINKS[tier]||STRIPE_LINKS.starter,'_blank');
+}
+// ─────────────────────────────────────────────────────────────────
+
+
+// ── NEXGENLIFE FREE TRIAL (5 docs) ───────────────────────────────
+// NGL_FREE_LIMIT is defined at top of auth script
+
+function nglTrialUsed() {
+  var user = window._nglCurrentUser;
+  // Paid users: unlimited
+  if (user && (user.paid || (user.user_metadata && user.user_metadata.paid))) return -1;
+  var used = parseInt(localStorage.getItem('ngl_trial_used') || '0');
+  return used;
+}
+
+function nglTrialOk() {
+  var used = nglTrialUsed();
+  if (used === -1) return true; // paid — unlimited
+  if (used >= NGL_FREE_LIMIT) {
+    showNglUpgradeWall();
+    return false;
+  }
+  return true;
+}
+
+function nglTrialIncrement() {
+  var used = nglTrialUsed();
+  if (used === -1) return; // paid — don't count
+  used++;
+  localStorage.setItem('ngl_trial_used', used);
+  nglUpdateTrialBadge();
+  if (used >= NGL_FREE_LIMIT) {
+    setTimeout(showNglUpgradeWall, 1800);
+  }
+}
+
+function nglUpdateTrialBadge() {
+  var used = nglTrialUsed();
+  var isPaid = (used === -1);
+  var rem = isPaid ? Infinity : Math.max(0, NGL_FREE_LIMIT - used);
+
+  // ── In-app bar badge ──
+  var barBadge = document.getElementById('nglTrialBadgeBar');
+  if (barBadge) {
+    if (isPaid) {
+      barBadge.textContent = '✓ Unlimited';
+      barBadge.style.display = 'inline-block';
+      barBadge.style.background = 'rgba(0,229,160,.1)';
+      barBadge.style.borderColor = 'rgba(0,229,160,.2)';
+      barBadge.style.color = 'var(--emerald)';
+    } else {
+      // Build countdown dots
+      var dots = '';
+      for (var i = 0; i < NGL_FREE_LIMIT; i++) {
+        var filled = i < rem;
+        dots += '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 2px;background:'
+          + (filled ? (rem <= 1 ? '#FF6B5B' : rem <= 2 ? 'var(--gold)' : 'var(--accent)') : 'rgba(255,255,255,.12)')
+          + ';border:1px solid '
+          + (filled ? (rem <= 1 ? 'rgba(255,107,91,.5)' : rem <= 2 ? 'rgba(255,209,102,.4)' : 'rgba(0,200,255,.4)') : 'rgba(255,255,255,.08)')
+          + '"></span>';
+      }
+      var label = rem === 0 ? 'No free docs left' : rem + ' free ' + (rem === 1 ? 'doc' : 'docs') + ' left';
+      barBadge.innerHTML = dots + '<span style="margin-left:5px">' + label + '</span>';
+      barBadge.style.display = 'inline-flex';
+      barBadge.style.alignItems = 'center';
+      barBadge.style.background = rem <= 1 ? 'rgba(255,100,80,.12)' : rem <= 2 ? 'rgba(255,209,102,.1)' : 'rgba(0,200,255,.1)';
+      barBadge.style.borderColor = rem <= 1 ? 'rgba(255,100,80,.35)' : rem <= 2 ? 'rgba(255,209,102,.3)' : 'rgba(0,200,255,.2)';
+      barBadge.style.color       = rem <= 1 ? '#FF8070'              : rem <= 2 ? 'var(--gold)'           : 'var(--accent)';
+    }
+  }
+
+  // ── In-app Upgrade button (inside modal bar) ──
+  var inAppBtn = document.getElementById('nglInAppUpgradeBtn');
+  if (inAppBtn) {
+    // Show upgrade button once user has used at least 1 doc, or when exhausted
+    inAppBtn.style.display = (!isPaid && used >= 1) ? 'inline-block' : 'none';
+  }
+
+  // ── Nav Upgrade button (always visible once trial started) ──
+  var navBtn = document.getElementById('navUpgradeBtn');
+  if (navBtn) {
+    navBtn.style.display = (!isPaid && used >= 1) ? 'inline-block' : 'none';
+  }
+}
+
+function showNglUpgradeWall() {
+  var pw = document.getElementById('paywallScreen');
+  if (!pw) return;
+
+  // Populate dynamic trial state
+  var used = nglTrialUsed();
+  var exhausted = (used !== -1 && used >= NGL_FREE_LIMIT);
+  var trialMsg = document.getElementById('paywallTrialMsg');
+  var countdownBar = document.getElementById('paywallCountdownBar');
+  var dotsEl = document.getElementById('paywallDots');
+  var dotsLabel = document.getElementById('paywallDotsLabel');
+
+  if (trialMsg) trialMsg.style.display = exhausted ? 'block' : 'none';
+
+  if (countdownBar && dotsEl && used !== -1) {
+    countdownBar.style.display = 'block';
+    var rem = Math.max(0, NGL_FREE_LIMIT - used);
+    var dots = '';
+    for (var i = 0; i < NGL_FREE_LIMIT; i++) {
+      var filled = i < used;
+      dots += '<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:'
+        + (filled ? (exhausted ? 'rgba(255,107,91,.7)' : 'var(--accent)') : 'rgba(255,255,255,.1)')
+        + ';border:2px solid '
+        + (filled ? (exhausted ? 'rgba(255,107,91,.9)' : 'var(--accent)') : 'rgba(255,255,255,.15)')
+        + '"></span>';
+    }
+    dotsEl.innerHTML = dots;
+    if (dotsLabel) dotsLabel.textContent = exhausted
+      ? 'All 5 free documents used — upgrade to continue'
+      : used + ' of ' + NGL_FREE_LIMIT + ' free documents used · ' + rem + ' remaining';
+  } else if (countdownBar) {
+    countdownBar.style.display = 'none';
+  }
+
+  pw.style.display = 'flex';
+}
+
+// Init badge on load
+document.addEventListener('DOMContentLoaded', function() {
+  nglUpdateTrialBadge();
+});
+// ─────────────────────────────────────────────────────────────────
 
 </script>
 
 <!-- PAYWALL SCREEN -->
 <div id="paywallScreen" style="display:none;position:fixed;inset:0;background:rgba(11,23,37,.98);z-index:9998;align-items:center;justify-content:center;backdrop-filter:blur(16px);padding:20px">
-  <div style="background:#0D1B2E;border:1px solid rgba(0,200,255,.25);border-radius:16px;padding:40px;max-width:680px;width:100%;text-align:center;box-shadow:0 0 60px rgba(0,200,255,.1)">
-    <div style="font-size:42px;margin-bottom:14px">🧬</div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px">NexGenLife</div>
+  <div style="background:#0D1B2E;border:1px solid rgba(0,200,255,.25);border-radius:16px;padding:40px;max-width:720px;width:100%;text-align:center;box-shadow:0 0 60px rgba(0,200,255,.1);position:relative">
+
+    <!-- Close button -->
+    <button onclick="document.getElementById('paywallScreen').style.display='none'" style="position:absolute;top:14px;right:16px;background:none;border:none;color:rgba(255,255,255,.3);font-size:20px;cursor:pointer;line-height:1;transition:color .15s" onmouseover="this.style.color='rgba(255,255,255,.7)'" onmouseout="this.style.color='rgba(255,255,255,.3)'">&#x2715;</button>
+
+    <div style="font-size:42px;margin-bottom:12px">🧬</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px">NexGenLife · Upgrade Required</div>
+
+    <!-- Dynamic message: trial exhausted vs upgrade prompt -->
+    <div id="paywallTrialMsg" style="display:none;background:rgba(255,107,91,.08);border:1px solid rgba(255,107,91,.25);border-radius:10px;padding:12px 20px;margin-bottom:18px;font-size:13px;color:#FF8070;font-family:var(--mono);letter-spacing:.3px">
+      🚫 You've used all <strong>5 free documents</strong>. Choose a plan to keep generating.
+    </div>
+
     <div style="font-size:24px;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:10px">Choose Your Plan to Continue</div>
     <div style="font-size:14px;color:var(--dim);line-height:1.7;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto">
-      Your account has been created. Select a plan to access the full NexGenLife platform and start generating regulatory documents.
+      Unlock unlimited document generation across all 8 modules — FDA, EMA, clinical trials, QMS, patents, and more.
+    </div>
+
+    <!-- Trial countdown bar -->
+    <div id="paywallCountdownBar" style="display:none;margin-bottom:24px">
+      <div style="font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Free Trial Usage</div>
+      <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:6px">
+        <div id="paywallDots" style="display:flex;gap:6px"></div>
+      </div>
+      <div id="paywallDotsLabel" style="font-family:var(--mono);font-size:10px;color:var(--muted)"></div>
     </div>
 
     <!-- Plan cards -->
@@ -2790,7 +3150,7 @@ function authSignOut(){
       <!-- Starter -->
       <div style="background:#0F2035;border:1px solid rgba(0,200,255,.15);border-radius:12px;padding:22px;text-align:center;transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor='rgba(0,200,255,.4)'" onmouseout="this.style.borderColor='rgba(0,200,255,.15)'">
         <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Starter</div>
-        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-1px;margin-bottom:4px">$490</div>
+        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-1px;margin-bottom:4px">$99</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:16px">/month</div>
         <div style="font-size:12px;color:var(--dim);margin-bottom:16px;line-height:1.6">3 programmes · 50 docs/mo · All 8 modules</div>
         <button onclick="paywallCheckout('starter')" style="width:100%;padding:10px;background:var(--accent);color:#04080E;border:none;border-radius:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;cursor:pointer;letter-spacing:.5px">Get Started →</button>
@@ -2800,7 +3160,7 @@ function authSignOut(){
       <div style="background:#0F2035;border:2px solid rgba(0,200,255,.35);border-radius:12px;padding:22px;text-align:center;position:relative;cursor:pointer" onmouseover="this.style.borderColor='rgba(0,200,255,.6)'" onmouseout="this.style.borderColor='rgba(0,200,255,.35)'">
         <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:#04080E;font-family:var(--mono);font-size:7.5px;font-weight:700;padding:3px 12px;border-radius:10px;letter-spacing:1px;white-space:nowrap">MOST POPULAR</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Professional</div>
-        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-1px;margin-bottom:4px">$1,490</div>
+        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-1px;margin-bottom:4px">$499</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:16px">/month</div>
         <div style="font-size:12px;color:var(--dim);margin-bottom:16px;line-height:1.6">Unlimited · All modules · Priority support</div>
         <button onclick="paywallCheckout('professional')" style="width:100%;padding:10px;background:var(--accent);color:#04080E;border:none;border-radius:7px;font-family:var(--mono);font-size:9.5px;font-weight:700;cursor:pointer;letter-spacing:.5px">Get Started →</button>
