@@ -1063,15 +1063,43 @@ nav {
     <select class="msel" id="docType"></select>
     <label class="mlbl" for="docJurisdiction">Target Jurisdiction</label>
     <select class="msel" id="docJurisdiction">
-      <option>FDA (United States)</option>
-      <option>EMA (European Union)</option>
-      <option>MHRA (United Kingdom)</option>
-      <option>PMDA (Japan)</option>
-      <option>Health Canada</option>
-      <option>TGA (Australia)</option>
-      <option>NAFDAC (Nigeria)</option>
-      <option>FDA Ghana / FDB</option>
-      <option>Multiple (parallel submission)</option>
+      <optgroup label="Americas">
+        <option>FDA (United States)</option>
+        <option>Health Canada</option>
+        <option>ANVISA (Brazil)</option>
+        <option>COFEPRIS (Mexico)</option>
+      </optgroup>
+      <optgroup label="Europe">
+        <option>EMA (European Union)</option>
+        <option>MHRA (United Kingdom)</option>
+        <option>Swissmedic (Switzerland)</option>
+      </optgroup>
+      <optgroup label="Africa">
+        <option>NAFDAC (Nigeria)</option>
+        <option>FDA Ghana / FDB</option>
+        <option>SAHPRA (South Africa)</option>
+        <option>EFDA (Ethiopia)</option>
+        <option>PPB (Kenya)</option>
+        <option>ARIPO (Regional — Africa)</option>
+        <option>AMA (African Medicines Agency)</option>
+      </optgroup>
+      <optgroup label="Asia">
+        <option>PMDA (Japan)</option>
+        <option>NMPA (China)</option>
+        <option>CDSCO (India)</option>
+        <option>MFDS (South Korea)</option>
+        <option>HSA (Singapore)</option>
+        <option>TFDA (Taiwan)</option>
+        <option>Thai FDA (Thailand)</option>
+        <option>BPOM (Indonesia)</option>
+      </optgroup>
+      <optgroup label="Oceania">
+        <option>TGA (Australia)</option>
+        <option>Medsafe (New Zealand)</option>
+      </optgroup>
+      <optgroup label="Global">
+        <option>Multiple (parallel submission)</option>
+      </optgroup>
     </select>
     <label class="mlbl" for="docNotes">Additional Context (optional)</label>
     <textarea class="mta" id="docNotes" placeholder="Describe your product, indication, study data, or any specific requirements…"></textarea>
@@ -1229,13 +1257,40 @@ nav {
         <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Jurisdiction</div>
         <select id="ldpJurisdiction" onchange="ldpUpdatePrompt()"
           style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:11px;color:var(--text);outline:none;appearance:none;margin-bottom:10px">
-          <option>FDA (United States)</option>
-          <option>EMA (European Union)</option>
-          <option>MHRA (United Kingdom)</option>
-          <option>Health Canada</option>
-          <option>TGA (Australia)</option>
-          <option>NAFDAC (Nigeria)</option>
-          <option>FDB (Ghana)</option>
+          <optgroup label="Americas">
+            <option>FDA (United States)</option>
+            <option>Health Canada</option>
+            <option>ANVISA (Brazil)</option>
+            <option>COFEPRIS (Mexico)</option>
+          </optgroup>
+          <optgroup label="Europe">
+            <option>EMA (European Union)</option>
+            <option>MHRA (United Kingdom)</option>
+            <option>Swissmedic (Switzerland)</option>
+          </optgroup>
+          <optgroup label="Africa">
+            <option>NAFDAC (Nigeria)</option>
+            <option>FDB (Ghana)</option>
+            <option>SAHPRA (South Africa)</option>
+            <option>EFDA (Ethiopia)</option>
+            <option>PPB (Kenya)</option>
+            <option>ARIPO (Regional — Africa)</option>
+            <option>AMA (African Medicines Agency)</option>
+          </optgroup>
+          <optgroup label="Asia">
+            <option>PMDA (Japan)</option>
+            <option>NMPA (China)</option>
+            <option>CDSCO (India)</option>
+            <option>MFDS (South Korea)</option>
+            <option>HSA (Singapore)</option>
+            <option>TFDA (Taiwan)</option>
+            <option>Thai FDA (Thailand)</option>
+            <option>BPOM (Indonesia)</option>
+          </optgroup>
+          <optgroup label="Oceania">
+            <option>TGA (Australia)</option>
+            <option>Medsafe (New Zealand)</option>
+          </optgroup>
         </select>
 
         <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Additional Context</div>
