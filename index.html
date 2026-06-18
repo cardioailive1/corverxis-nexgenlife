@@ -2771,7 +2771,7 @@ openLiveDemo = function() {
 
 <script>
 // ── SUPABASE AUTH + PAYWALL ──────────────────────────────────────
-var NGL_FREE_LIMIT = 5; // define first — used throughout auth flow
+var NGL_FREE_LIMIT = 2; // define first — used throughout auth flow
 var _nglHandlingSignup = false; // guard: prevents onAuthStateChange from overriding signup flow
 var STRIPE_LINKS = {
   starter:      'https://buy.stripe.com/28E5kDdFo9PD6iT1B01oI0a',
@@ -3452,7 +3452,10 @@ function showNglUpgradeWall() {
   var dotsEl = document.getElementById('paywallDots');
   var dotsLabel = document.getElementById('paywallDotsLabel');
 
-  if (trialMsg) trialMsg.style.display = exhausted ? 'block' : 'none';
+  if (trialMsg) {
+    trialMsg.style.display = exhausted ? 'block' : 'none';
+    if (exhausted) trialMsg.innerHTML = '🚫 You\'ve used all <strong>' + NGL_FREE_LIMIT + ' free document' + (NGL_FREE_LIMIT===1?'':'s') + '</strong>. Choose a plan to keep generating.';
+  }
 
   if (countdownBar && dotsEl && used !== -1) {
     countdownBar.style.display = 'block';
@@ -3468,7 +3471,7 @@ function showNglUpgradeWall() {
     }
     dotsEl.innerHTML = dots;
     if (dotsLabel) dotsLabel.textContent = exhausted
-      ? 'All 5 free documents used — upgrade to continue'
+      ? 'All ' + NGL_FREE_LIMIT + ' free documents used — upgrade to continue'
       : used + ' of ' + NGL_FREE_LIMIT + ' free documents used · ' + rem + ' remaining';
   } else if (countdownBar) {
     countdownBar.style.display = 'none';
