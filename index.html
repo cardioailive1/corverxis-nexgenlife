@@ -2688,7 +2688,7 @@ openLiveDemo = function() {
       <label style="display:flex;align-items:flex-start;gap:9px;margin-bottom:16px;cursor:pointer;user-select:none">
         <input id="suPrivacyAgree" type="checkbox" style="margin-top:2px;width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0"/>
         <span style="font-size:11px;color:var(--dim);line-height:1.5">
-          I have read and agree to the <a href="nexgenlife-privacy.html" target="_blank" style="color:var(--accent);text-decoration:underline" onclick="event.stopPropagation()">Privacy Policy</a> and <a href="nexgenlife-privacy.html#terms" target="_blank" style="color:var(--accent);text-decoration:underline" onclick="event.stopPropagation()">Terms of Service</a>.
+          I have read and agree to the <a href="#" onclick="openPrivacyModal('privacy');return false;" style="color:var(--accent);text-decoration:underline">Privacy Policy</a> and <a href="#" onclick="openPrivacyModal('terms');return false;" style="color:var(--accent);text-decoration:underline">Terms of Service</a>.
         </span>
       </label>
       <button onclick="authSignUp()" style="width:100%;padding:13px;background:var(--accent);color:#04080E;border:none;border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer">Create Account &#x2192;</button>
@@ -3329,6 +3329,34 @@ function hidepaywall(){
   if(pw)pw.style.display='none';
   nglUpdateTrialBadge();
 }
+
+// ── PRIVACY MODAL ─────────────────────────────────────────────────
+function openPrivacyModal(section) {
+  var modal = document.getElementById('privacyModal');
+  var privS  = document.getElementById('privSectionPrivacy');
+  var termsS = document.getElementById('privSectionTerms');
+  var tabP   = document.getElementById('privTabPrivacy');
+  var tabT   = document.getElementById('privTabTerms');
+  if (!modal || !privS || !termsS) return;
+  var isTerms = (section === 'terms');
+  privS.style.display  = isTerms ? 'none'  : 'block';
+  termsS.style.display = isTerms ? 'block' : 'none';
+  if (tabP) { tabP.style.background = isTerms ? 'transparent' : 'rgba(0,200,255,.12)'; tabP.style.borderColor = isTerms ? 'rgba(0,200,255,.15)' : 'rgba(0,200,255,.3)'; tabP.style.color = isTerms ? 'var(--dim)' : 'var(--accent)'; }
+  if (tabT) { tabT.style.background = isTerms ? 'rgba(0,200,255,.12)' : 'transparent'; tabT.style.borderColor = isTerms ? 'rgba(0,200,255,.3)' : 'rgba(0,200,255,.15)'; tabT.style.color = isTerms ? 'var(--accent)' : 'var(--dim)'; }
+  modal.style.display = 'flex';
+  modal.scrollTop = 0;
+}
+function closePrivacyModal() {
+  var modal = document.getElementById('privacyModal');
+  if (modal) modal.style.display = 'none';
+}
+function agreeAndClosePrivacy() {
+  var cb = document.getElementById('suPrivacyAgree');
+  if (cb) cb.checked = true;
+  closePrivacyModal();
+  toast('Privacy Policy & Terms accepted ✓', 'ok');
+}
+// ──────────────────────────────────────────────────────────────────
 function showResetForm(show){
   var fsi=document.getElementById('formSignIn'),fsu=document.getElementById('formSignUp'),fsr=document.getElementById('formReset');
   var tsi=document.getElementById('tabSignIn'),tsu=document.getElementById('tabSignUp');
@@ -3527,6 +3555,9 @@ function showNglUpgradeWall() {
 // Init badge on load
 document.addEventListener('DOMContentLoaded', function() {
   nglUpdateTrialBadge();
+  // Privacy modal backdrop click to close
+  var pm = document.getElementById('privacyModal');
+  if (pm) pm.addEventListener('click', function(e){ if(e.target === this) closePrivacyModal(); });
 });
 // ─────────────────────────────────────────────────────────────────
 
@@ -3600,5 +3631,98 @@ document.addEventListener('DOMContentLoaded', function() {
     <button onclick="authSignOut()" style="background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:9px;cursor:pointer;text-decoration:underline">Sign out</button>
   </div>
 </div>
+
+<!-- ── PRIVACY POLICY & TERMS OF SERVICE MODAL ─────────────────── -->
+<div id="privacyModal" style="display:none;position:fixed;inset:0;background:rgba(11,23,37,.97);z-index:999999;align-items:flex-start;justify-content:center;backdrop-filter:blur(12px);padding:20px;overflow-y:auto">
+  <div style="background:#0D1B2E;border:1px solid rgba(0,200,255,.2);border-radius:16px;max-width:740px;width:100%;margin:0 auto;position:relative;box-shadow:0 0 60px rgba(0,200,255,.08)">
+
+    <!-- Sticky header -->
+    <div style="position:sticky;top:0;background:#0D1B2E;border-bottom:1px solid rgba(0,200,255,.15);border-radius:16px 16px 0 0;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;z-index:2;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.2px">NexGenLife Legal</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px">Privacy Policy & Terms of Service</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="privTabPrivacy" onclick="openPrivacyModal('privacy')" style="padding:6px 13px;border-radius:6px;font-family:var(--mono);font-size:9px;font-weight:700;border:1px solid rgba(0,200,255,.3);background:rgba(0,200,255,.12);color:var(--accent);cursor:pointer">Privacy</button>
+        <button id="privTabTerms" onclick="openPrivacyModal('terms')" style="padding:6px 13px;border-radius:6px;font-family:var(--mono);font-size:9px;font-weight:700;border:1px solid rgba(0,200,255,.15);background:transparent;color:var(--dim);cursor:pointer">Terms</button>
+        <button onclick="closePrivacyModal()" style="width:30px;height:30px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--dim);font-size:16px;cursor:pointer;line-height:1" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--dim)'">✕</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div style="padding:28px 32px 36px;font-size:14px;color:var(--dim);line-height:1.75">
+
+      <div style="background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.15);border-radius:10px;padding:14px 18px;margin-bottom:28px;font-size:13px">
+        <strong style="color:var(--text)">Summary:</strong> NexGenLife collects only what is needed to run your account and generate documents. We never sell your data. You can request deletion at any time. By creating an account you agree to everything below.
+      </div>
+
+      <!-- PRIVACY SECTION -->
+      <div id="privSectionPrivacy">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px">01 — Privacy Policy</div>
+        <p>Corverxis Technologies Ltd ("we," "us," or "our") operates NexGenLife, an AI-assisted life sciences document platform. This policy explains what we collect, how we use it, and your choices — in accordance with GDPR, UK GDPR, and CCPA where applicable.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Information We Collect</div>
+        <p><strong style="color:var(--text)">Account data:</strong> full name, work email, organisation name, hashed password. Your optional 2FA secret is stored only in your local browser — never sent to our servers.</p>
+        <p><strong style="color:var(--text)">Usage data:</strong> document generation history, selected jurisdiction and document type, subscription counters, and general feature usage for product improvement.</p>
+        <p><strong style="color:var(--text)">Payment data:</strong> processed entirely by Stripe. We never store card numbers or CVV. Stripe's own privacy policy governs their data.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">How We Use It</div>
+        <p>To authenticate your account, generate your requested documents, process payments, send essential account emails (receipts, security alerts, password resets), improve the platform, and comply with legal obligations. We do not use your document content to train third-party AI models without your explicit consent.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">How We Share It</div>
+        <p>We do not sell your data. We share only with: our infrastructure providers (Supabase for auth, Stripe for payments), legal authorities when required by law, or a successor entity in a merger — with user notice.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Security & Retention</div>
+        <p>We use encrypted connections (TLS), secure password hashing, and optional 2FA. Your data is retained while your account is active. On account deletion, data is removed or anonymised within a reasonable period, except where law requires retention.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Your Rights</div>
+        <p>You may request access, correction, deletion, export, or restriction of your data at any time. Email <a href="mailto:privacy@corverxis.com" style="color:var(--accent)">privacy@corverxis.com</a> and we will respond within the timeframe required by applicable law.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Cookies & Local Storage</div>
+        <p>We use browser local storage (not third-party tracking cookies) to keep you signed in and store local preferences. Clearing browser storage signs you out and resets preferences. No cross-site tracking.</p>
+      </div>
+
+      <!-- TERMS SECTION -->
+      <div id="privSectionTerms" style="display:none">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px">09 — Terms of Service</div>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:0 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Acceptance</div>
+        <p>By creating an account or using NexGenLife you agree to be bound by these Terms. If you do not agree, do not create an account or use the Service.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Account Responsibilities</div>
+        <p>You must provide accurate registration information, keep your password confidential, and notify us promptly of any unauthorised access to your account.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Acceptable Use</div>
+        <p>You agree not to use the Service to generate fraudulent regulatory submissions, misrepresent generated documents to any regulatory authority, or violate applicable law. We reserve the right to suspend or terminate accounts in breach of these terms.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Subscription & Billing</div>
+        <p>Paid plans are billed in advance on a recurring basis as described at checkout. You may cancel at any time; cancellation takes effect at the end of the billing period. Fees are non-refundable except where required by law.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Intellectual Property</div>
+        <p>You retain ownership of the content you input and documents generated for you. Corverxis retains all rights to the NexGenLife platform, software, and underlying technology.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Disclaimers & Liability</div>
+        <div style="background:rgba(255,160,50,.08);border:1px solid rgba(255,160,50,.25);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px">
+          <strong style="color:#FFD166">Important:</strong> NexGenLife is an AI-assisted drafting tool. Generated documents are starting points and must be reviewed by qualified regulatory, legal, and scientific professionals before submission to any regulatory authority. Corverxis makes no warranty of regulatory approval outcomes.
+        </div>
+        <p>The Service is provided "as is" without warranties of any kind. To the maximum extent permitted by law, Corverxis Technologies Ltd shall not be liable for indirect, incidental, special, or consequential damages arising from use of the Service.</p>
+
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin:20px 0 8px;padding-left:10px;border-left:2px solid var(--accent)">Contact</div>
+        <p><strong style="color:var(--text)">Corverxis Technologies Ltd</strong> — Data Protection & Privacy<br>
+        <a href="mailto:privacy@corverxis.com" style="color:var(--accent)">privacy@corverxis.com</a></p>
+      </div>
+
+      <div style="margin-top:24px;padding:10px 14px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.1);border-radius:8px;font-family:var(--mono);font-size:9.5px;color:var(--muted)">Last updated: 18 June 2026 · Corverxis Technologies Ltd</div>
+    </div>
+
+    <!-- Footer -->
+    <div style="border-top:1px solid rgba(0,200,255,.15);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-radius:0 0 16px 16px;background:#0D1B2E;gap:10px;flex-wrap:wrap">
+      <span style="font-family:var(--mono);font-size:9.5px;color:var(--muted)">© 2026 Corverxis Technologies Ltd. All rights reserved.</span>
+      <button onclick="agreeAndClosePrivacy()" style="padding:10px 22px;background:var(--accent);color:#04080E;border:none;border-radius:8px;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap">I Agree & Close ✓</button>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>
