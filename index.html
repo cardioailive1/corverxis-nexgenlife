@@ -2685,6 +2685,12 @@ openLiveDemo = function() {
       <input id="suEmail" type="email" placeholder="Work email" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
       <input id="suOrg" type="text" placeholder="Organisation" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box"/>
       <input id="suPass" type="password" placeholder="Password (min 6 chars)" style="width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:11px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:14px;box-sizing:border-box"/>
+      <label style="display:flex;align-items:flex-start;gap:9px;margin-bottom:16px;cursor:pointer;user-select:none">
+        <input id="suPrivacyAgree" type="checkbox" style="margin-top:2px;width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0"/>
+        <span style="font-size:11px;color:var(--dim);line-height:1.5">
+          I have read and agree to the <a href="nexgenlife-privacy.html" target="_blank" style="color:var(--accent);text-decoration:underline" onclick="event.stopPropagation()">Privacy Policy</a> and <a href="nexgenlife-privacy.html#terms" target="_blank" style="color:var(--accent);text-decoration:underline" onclick="event.stopPropagation()">Terms of Service</a>.
+        </span>
+      </label>
       <button onclick="authSignUp()" style="width:100%;padding:13px;background:var(--accent);color:#04080E;border:none;border-radius:8px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer">Create Account &#x2192;</button>
     </div>
     <div style="margin-top:16px;font-family:var(--mono);font-size:8.5px;color:var(--muted)">Secured by Corverxis Technologies</div>
@@ -3222,9 +3228,20 @@ async function authSignUp(){
   var email=(document.getElementById('suEmail')||{}).value.trim()||'';
   var org=(document.getElementById('suOrg')||{}).value.trim()||'';
   var pass=(document.getElementById('suPass')||{}).value||'';
+  var agreedEl=document.getElementById('suPrivacyAgree');
+  var agreed=agreedEl?agreedEl.checked:false;
   if(!name){authMsg('Enter your full name','err');return;}
   if(!email||!email.includes('@')){authMsg('Enter a valid email','err');return;}
   if(!pass||pass.length<6){authMsg('Password must be at least 6 characters','err');return;}
+  if(!agreed){
+    authMsg('Please agree to the Privacy Policy and Terms of Service to continue.','err');
+    if(agreedEl){
+      agreedEl.parentElement.style.color='#FF8070';
+      agreedEl.focus();
+      setTimeout(function(){ if(agreedEl.parentElement) agreedEl.parentElement.style.color=''; },2500);
+    }
+    return;
+  }
   var sb=_nglSB(); if(!sb){authMsg('Connection error — please refresh.','err');return;}
 
   _nglHandlingSignup = true; // block onAuthStateChange from interfering
@@ -3234,7 +3251,7 @@ async function authSignUp(){
     email:email,
     password:pass,
     options:{
-      data:{full_name:name,organisation:org},
+      data:{full_name:name,organisation:org,privacy_agreed:true,privacy_agreed_at:new Date().toISOString()},
       emailRedirectTo:window.location.href
     }
   });
@@ -3365,6 +3382,15 @@ var STRIPE_LINKS={starter:'https://buy.stripe.com/28E5kDdFo9PD6iT1B01oI0a',profe
 function openWaitlist(tierLabel,priceStr,tier){
   localStorage.setItem('ngl_pending_plan',tier);
   window.open(STRIPE_LINKS[tier]||STRIPE_LINKS.starter,'_blank');
+}
+
+// Called directly from the paywall plan buttons (Starter / Professional / Enterprise)
+function paywallCheckout(tier) {
+  var link = STRIPE_LINKS[tier];
+  if (!link) { toast('Plan not available — please contact support.', 'err'); return; }
+  localStorage.setItem('ngl_pending_plan', tier);
+  window.open(link, '_blank');
+  toast('Opening checkout for ' + tier.charAt(0).toUpperCase() + tier.slice(1) + ' plan…', 'ok');
 }
 // ─────────────────────────────────────────────────────────────────
 
