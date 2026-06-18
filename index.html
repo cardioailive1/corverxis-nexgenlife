@@ -2771,7 +2771,7 @@ openLiveDemo = function() {
 
 <script>
 // ── SUPABASE AUTH + PAYWALL ──────────────────────────────────────
-var NGL_FREE_LIMIT = 2; // define first — used throughout auth flow
+var NGL_FREE_LIMIT = 0; // no free trial — paid plans only
 var _nglHandlingSignup = false; // guard: prevents onAuthStateChange from overriding signup flow
 var STRIPE_LINKS = {
   starter:      'https://buy.stripe.com/28E5kDdFo9PD6iT1B01oI0a',
@@ -2824,6 +2824,9 @@ function onNglSignedIn(user) {
     // Paid subscriber — full access, hide paywall
     hidepaywall();
     toast('Welcome back, ' + name + ' ✓', 'ok');
+  } else if (NGL_FREE_LIMIT === 0) {
+    // No free trial at all — straight to paywall
+    showNglUpgradeWall();
   } else {
     // Free trial user — check how many docs they've used
     hidepaywall(); // make sure paywall is hidden first
@@ -3278,17 +3281,24 @@ async function authSignUp(){
 }
 
 function _nglBootNewUser(user,name,org){
-  // Set up fresh free trial for a brand new user
-  localStorage.setItem('ngl_trial_used','0');
   window._nglCurrentUser=user;
   var wall=document.getElementById('authWall');if(wall)wall.style.display='none';
   var bar=document.getElementById('authUserBar');if(bar)bar.style.display='flex';
   var nameEl=document.getElementById('authUserName');
   var displayName=name||(user.user_metadata&&user.user_metadata.full_name)||user.email.split('@')[0];
   if(nameEl)nameEl.textContent=displayName;
-  hidepaywall();
-  nglUpdateTrialBadge();
-  toast('Welcome to NexGenLife, '+displayName+'! You have '+NGL_FREE_LIMIT+' free documents.','ok');
+
+  if (NGL_FREE_LIMIT > 0) {
+    // Free trial enabled — set up fresh trial for new user
+    localStorage.setItem('ngl_trial_used','0');
+    hidepaywall();
+    nglUpdateTrialBadge();
+    toast('Welcome to NexGenLife, '+displayName+'! You have '+NGL_FREE_LIMIT+' free document'+(NGL_FREE_LIMIT===1?'':'s')+'.','ok');
+  } else {
+    // No free trial — go straight to paywall
+    toast('Account created! Choose a plan to get started.','ok');
+    showNglUpgradeWall();
+  }
 }
 async function authSignOut(){
   var sb=_nglSB(); if(sb) await sb.auth.signOut();
@@ -3405,6 +3415,9 @@ function nglUpdateTrialBadge() {
       barBadge.style.background = 'rgba(0,229,160,.1)';
       barBadge.style.borderColor = 'rgba(0,229,160,.2)';
       barBadge.style.color = 'var(--emerald)';
+    } else if (NGL_FREE_LIMIT === 0) {
+      // No free trial offered at all — hide the badge, paywall handles access
+      barBadge.style.display = 'none';
     } else {
       // Build countdown dots
       var dots = '';
@@ -3429,14 +3442,14 @@ function nglUpdateTrialBadge() {
   // ── In-app Upgrade button (inside modal bar) ──
   var inAppBtn = document.getElementById('nglInAppUpgradeBtn');
   if (inAppBtn) {
-    // Show upgrade button once user has used at least 1 doc, or when exhausted
-    inAppBtn.style.display = (!isPaid && used >= 1) ? 'inline-block' : 'none';
+    // Show whenever non-paid: immediately if no trial exists, otherwise after first doc
+    inAppBtn.style.display = (!isPaid && (NGL_FREE_LIMIT === 0 || used >= 1)) ? 'inline-block' : 'none';
   }
 
-  // ── Nav Upgrade button (always visible once trial started) ──
+  // ── Nav Upgrade button ──
   var navBtn = document.getElementById('navUpgradeBtn');
   if (navBtn) {
-    navBtn.style.display = (!isPaid && used >= 1) ? 'inline-block' : 'none';
+    navBtn.style.display = (!isPaid && (NGL_FREE_LIMIT === 0 || used >= 1)) ? 'inline-block' : 'none';
   }
 }
 
@@ -3453,11 +3466,16 @@ function showNglUpgradeWall() {
   var dotsLabel = document.getElementById('paywallDotsLabel');
 
   if (trialMsg) {
-    trialMsg.style.display = exhausted ? 'block' : 'none';
-    if (exhausted) trialMsg.innerHTML = '🚫 You\'ve used all <strong>' + NGL_FREE_LIMIT + ' free document' + (NGL_FREE_LIMIT===1?'':'s') + '</strong>. Choose a plan to keep generating.';
+    if (NGL_FREE_LIMIT === 0) {
+      trialMsg.style.display = 'block';
+      trialMsg.innerHTML = '🔒 NexGenLife is available on a <strong>paid plan</strong>. Choose one below to get started.';
+    } else {
+      trialMsg.style.display = exhausted ? 'block' : 'none';
+      if (exhausted) trialMsg.innerHTML = '🚫 You\'ve used all <strong>' + NGL_FREE_LIMIT + ' free document' + (NGL_FREE_LIMIT===1?'':'s') + '</strong>. Choose a plan to keep generating.';
+    }
   }
 
-  if (countdownBar && dotsEl && used !== -1) {
+  if (countdownBar && dotsEl && used !== -1 && NGL_FREE_LIMIT > 0) {
     countdownBar.style.display = 'block';
     var rem = Math.max(0, NGL_FREE_LIMIT - used);
     var dots = '';
@@ -3474,7 +3492,7 @@ function showNglUpgradeWall() {
       ? 'All ' + NGL_FREE_LIMIT + ' free documents used — upgrade to continue'
       : used + ' of ' + NGL_FREE_LIMIT + ' free documents used · ' + rem + ' remaining';
   } else if (countdownBar) {
-    countdownBar.style.display = 'none';
+    countdownBar.style.display = 'none'; // hidden when paid, or when no free trial offered
   }
 
   pw.style.display = 'flex';
