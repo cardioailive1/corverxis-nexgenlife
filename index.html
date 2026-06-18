@@ -1017,7 +1017,7 @@ nav {
         <li>Custom validation package (CSV/IQ/OQ/PQ)</li>
         <li>White-label option available</li>
       </ul>
-      <button class="price-cta sec" onclick="window.open('https://buy.stripe.com/cNi9AT58Se5TgXxfrQ1oI03','_blank')">Contact Sales →</button>
+      <button class="price-cta sec" onclick="openEnterpriseForm()">Contact Sales →</button>
     </div>
 
   </div>
@@ -1429,6 +1429,46 @@ nav {
     <div class="mbtns" id="wlBtns">
       <button class="mbtn-p" onclick="submitWaitlist()" id="wlBtn">Join Waitlist →</button>
       <button class="mbtn-s" onclick="closeModal('waitlistModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ENTERPRISE CONTACT FORM MODAL ─────────────────────────────── -->
+<div class="modal-ovl" id="enterpriseModal">
+  <div class="modal" style="max-width:480px">
+    <button class="modal-x" onclick="closeModal('enterpriseModal')">&#x2715;</button>
+    <div style="font-size:22px;margin-bottom:10px">🏢</div>
+    <div class="modal-title">Talk to Our Enterprise Team</div>
+    <div class="modal-sub">Tell us about your organisation and we'll get back to you within 1 business day.</div>
+
+    <label class="mlbl">Full Name *</label>
+    <input class="minp" id="entName" placeholder="Dr. Sarah Mensah"/>
+    <label class="mlbl">Work Email *</label>
+    <input class="minp" id="entEmail" type="email" placeholder="sarah@biotechco.com" required/>
+    <label class="mlbl">Organisation *</label>
+    <input class="minp" id="entOrg" placeholder="BiotechCo Ltd"/>
+    <label class="mlbl">Team Size</label>
+    <select class="msel" id="entSize">
+      <option value="">Select…</option>
+      <option>1–10</option>
+      <option>11–50</option>
+      <option>51–200</option>
+      <option>201–1000</option>
+      <option>1000+</option>
+    </select>
+    <label class="mlbl">What do you need help with?</label>
+    <textarea class="minp" id="entMessage" rows="4" placeholder="Tell us about your regulatory programmes, jurisdictions, and what you're looking for…" style="resize:vertical;min-height:90px;font-family:var(--mono)"></textarea>
+
+    <div id="entSuccess" style="display:none;background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.2);border-radius:8px;padding:14px 16px;text-align:center;margin-top:10px">
+      <div style="font-size:24px;margin-bottom:8px">✓</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Message sent!</div>
+      <div style="font-size:12.5px;color:var(--dim)">Our team will reach out to you shortly at the email you provided.</div>
+    </div>
+    <div id="entError" style="display:none;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.25);border-radius:8px;padding:12px 16px;text-align:center;margin-top:10px;font-size:12.5px;color:#FF8070"></div>
+
+    <div class="mbtns" id="entBtns">
+      <button class="mbtn-p" onclick="submitEnterpriseForm()" id="entBtn">Send Message →</button>
+      <button class="mbtn-s" onclick="closeModal('enterpriseModal')">Cancel</button>
     </div>
   </div>
 </div>
@@ -2375,6 +2415,94 @@ function openWaitlist(tier, price) {
   openModal('waitlistModal');
 }
 
+// ── ENTERPRISE CONTACT FORM ──────────────────────────────────────
+// Uses Formspree (https://formspree.io) to deliver submissions straight
+// to support@corverxis.com without needing a backend server.
+// Replace YOUR_FORM_ID below with your real Formspree form ID after setup.
+var ENTERPRISE_FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+function openEnterpriseForm() {
+  var ok = document.getElementById('entSuccess');
+  var err = document.getElementById('entError');
+  var btns = document.getElementById('entBtns');
+  if (ok) ok.style.display = 'none';
+  if (err) err.style.display = 'none';
+  if (btns) btns.style.display = 'flex';
+  ['entName','entEmail','entOrg','entSize','entMessage'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  openModal('enterpriseModal');
+}
+
+async function submitEnterpriseForm() {
+  var name = (document.getElementById('entName')||{}).value.trim() || '';
+  var email = (document.getElementById('entEmail')||{}).value.trim() || '';
+  var org = (document.getElementById('entOrg')||{}).value.trim() || '';
+  var size = (document.getElementById('entSize')||{}).value || '';
+  var message = (document.getElementById('entMessage')||{}).value.trim() || '';
+  var errEl = document.getElementById('entError');
+
+  if (!name) { _entShowError('Please enter your full name.'); return; }
+  if (!email || !email.includes('@')) { _entShowError('Please enter a valid work email.'); return; }
+  if (!org) { _entShowError('Please enter your organisation.'); return; }
+
+  var btn = document.getElementById('entBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  if (errEl) errEl.style.display = 'none';
+
+  try {
+    var resp = await fetch(ENTERPRISE_FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: 'NexGenLife Enterprise Inquiry — ' + org,
+        name: name,
+        email: email,
+        organisation: org,
+        team_size: size,
+        message: message,
+        source: 'NexGenLife Enterprise Form'
+      })
+    });
+
+    if (resp.ok) {
+      _entShowSuccess();
+    } else {
+      throw new Error('Submission failed (status ' + resp.status + ')');
+    }
+  } catch (e) {
+    // Fallback: open a pre-filled mailto so the message still reaches support
+    var body = 'Name: ' + name + '\nEmail: ' + email + '\nOrganisation: ' + org +
+               '\nTeam size: ' + size + '\n\nMessage:\n' + message;
+    var mailto = 'mailto:support@corverxis.com?subject=' +
+                 encodeURIComponent('NexGenLife Enterprise Inquiry — ' + org) +
+                 '&body=' + encodeURIComponent(body);
+    window.open(mailto, '_blank');
+    _entShowSuccess('We opened your email client as a backup — please hit send there to reach us.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Message →'; }
+  }
+}
+
+function _entShowSuccess(note) {
+  var succ = document.getElementById('entSuccess');
+  var btns = document.getElementById('entBtns');
+  if (succ) {
+    succ.style.display = 'block';
+    if (note) {
+      var noteEl = succ.querySelector('div:last-child');
+      if (noteEl) noteEl.textContent = note;
+    }
+  }
+  if (btns) btns.style.display = 'none';
+  toast('Message sent to our Enterprise team ✓', 'ok');
+}
+
+function _entShowError(msg) {
+  var errEl = document.getElementById('entError');
+  if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+}
+// ─────────────────────────────────────────────────────────────────
 async function submitWaitlist() {
   var email = (document.getElementById('wlEmail')||{}).value || '';
   if (!email || !email.includes('@')) { toast('Enter a valid email address', 'err'); return; }
@@ -2782,7 +2910,7 @@ var _nglHandlingSignup = false; // guard: prevents onAuthStateChange from overri
 var STRIPE_LINKS = {
   starter:      'https://buy.stripe.com/28E5kDdFo9PD6iT1B01oI0a',
   professional: 'https://buy.stripe.com/9B68wP30K2nbgXx2F41oI0b',
-  enterprise:   'https://buy.stripe.com/cNi9AT58Se5TgXxfrQ1oI03',
+  enterprise:   'mailto:support@corverxis.com?subject=NexGenLife%20Enterprise%20Inquiry&body=Hi%20NexGenLife%20team%2C%0A%0AI%27m%20interested%20in%20the%20Enterprise%20plan.%20Please%20get%20in%20touch%20to%20discuss%20pricing%20and%20setup.%0A%0AOrganisation%3A%20%0AUse%20case%3A%20',
 };
 window._nglCurrentUser = null;
 
@@ -3406,7 +3534,7 @@ async function doUpdatePassword(){
   history.replaceState(null,'',window.location.pathname);
   setTimeout(function(){sb.auth.getSession().then(function(res){if(res.data&&res.data.session)onNglSignedIn(res.data.session.user);});},1200);
 }
-var STRIPE_LINKS={starter:'https://buy.stripe.com/28E5kDdFo9PD6iT1B01oI0a',professional:'https://buy.stripe.com/9B68wP30K2nbgXx2F41oI0b',enterprise:'https://buy.stripe.com/cNi9AT58Se5TgXxfrQ1oI03'};
+var STRIPE_LINKS={starter:'https://buy.stripe.com/28E5kDdFo9PD6iT1B01oI0a',professional:'https://buy.stripe.com/9B68wP30K2nbgXx2F41oI0b',enterprise:'mailto:support@corverxis.com?subject=NexGenLife%20Enterprise%20Inquiry&body=Hi%20NexGenLife%20team%2C%0A%0AI%27m%20interested%20in%20the%20Enterprise%20plan.%20Please%20get%20in%20touch%20to%20discuss%20pricing%20and%20setup.%0A%0AOrganisation%3A%20%0AUse%20case%3A%20'};
 function openWaitlist(tierLabel,priceStr,tier){
   localStorage.setItem('ngl_pending_plan',tier);
   window.open(STRIPE_LINKS[tier]||STRIPE_LINKS.starter,'_blank');
@@ -3414,6 +3542,12 @@ function openWaitlist(tierLabel,priceStr,tier){
 
 // Called directly from the paywall plan buttons (Starter / Professional / Enterprise)
 function paywallCheckout(tier) {
+  if (tier === 'enterprise') {
+    // Not a payment — open the Enterprise contact form
+    var pw = document.getElementById('paywallScreen'); if (pw) pw.style.display = 'none';
+    openEnterpriseForm();
+    return;
+  }
   var link = STRIPE_LINKS[tier];
   if (!link) { toast('Plan not available — please contact support.', 'err'); return; }
   localStorage.setItem('ngl_pending_plan', tier);
