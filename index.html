@@ -1906,9 +1906,25 @@ async function ldpGenerate() {
 
     if (!resp.ok) {
       var errData = await resp.json().catch(function(){ return {error:{message:'HTTP '+resp.status}}; });
-      var errMsg = (errData.error && errData.error.message) || 'HTTP ' + resp.status;
-      if (resp.status === 401) errMsg = 'Invalid API key. Check your Anthropic key.';
-      if (resp.status === 429) errMsg = 'Rate limit — wait a moment and try again.';
+      var rawMsg = ((errData.error && errData.error.message) || '').toLowerCase();
+      var errMsg;
+
+      if (resp.status === 401) {
+        errMsg = 'Invalid API key. Check your Anthropic key.';
+      } else if (resp.status === 429) {
+        errMsg = 'Too many requests right now — please wait a moment and try again.';
+      } else if (
+        resp.status === 400 &&
+        (rawMsg.includes('credit balance') || rawMsg.includes('insufficient') || rawMsg.includes('billing'))
+      ) {
+        // Never expose our backend API credit/billing status to customers —
+        // they are not the ones managing API usage.
+        errMsg = 'Document generation is temporarily unavailable. Please try again shortly, or contact support@corverxis.com if this continues.';
+      } else if (resp.status >= 500) {
+        errMsg = 'Our document service is temporarily unavailable. Please try again shortly, or contact support@corverxis.com if this continues.';
+      } else {
+        errMsg = 'Something went wrong generating your document. Please try again, or contact support@corverxis.com if this continues.';
+      }
       throw new Error(errMsg);
     }
 
@@ -1956,8 +1972,21 @@ async function ldpGenerate() {
               var docEl = document.getElementById('ldpDoc');
               if (docEl) docEl.scrollTop = docEl.scrollHeight;
             }
+          } else if (ev.type === 'error') {
+            // Mid-stream error from the API — never expose raw credit/billing details
+            var streamRawMsg = ((ev.error && ev.error.message) || '').toLowerCase();
+            var streamErrMsg;
+            if (streamRawMsg.includes('credit balance') || streamRawMsg.includes('insufficient') || streamRawMsg.includes('billing')) {
+              streamErrMsg = 'Document generation is temporarily unavailable. Please try again shortly, or contact support@corverxis.com if this continues.';
+            } else {
+              streamErrMsg = 'Document generation was interrupted. Please try again, or contact support@corverxis.com if this continues.';
+            }
+            throw new Error(streamErrMsg);
           }
-        } catch(e) {}
+        } catch(e) {
+          if (e instanceof Error && e.message && e.message.indexOf('contact support@corverxis.com') !== -1) throw e;
+          // Otherwise swallow JSON parse noise from partial chunks
+        }
       }
     }
 
@@ -1975,10 +2004,15 @@ async function ldpGenerate() {
     clearInterval(tmIv);
     document.getElementById('ldpThinking').style.display = 'none';
     document.getElementById('ldpEmpty').style.display = 'flex';
+    var safeMsg = (err && err.message) ? err.message : 'Please try again, or contact support@corverxis.com if this continues.';
+    var displayMsg = safeMsg.replace(
+      'support@corverxis.com',
+      '<a href="mailto:support@corverxis.com" style="color:var(--accent);text-decoration:underline">support@corverxis.com</a>'
+    );
     document.getElementById('ldpEmpty').innerHTML =
       '<div style="font-size:36px;margin-bottom:14px">⚠️</div>'
       + '<div style="font-size:14px;font-weight:600;color:#FF6B6B;margin-bottom:8px">Generation failed</div>'
-      + '<div style="font-size:12.5px;color:var(--muted);max-width:320px;line-height:1.65">' + (err.message||'Unknown error') + '</div>';
+      + '<div style="font-size:12.5px;color:var(--muted);max-width:320px;line-height:1.65">' + displayMsg + '</div>';
     ldpSetStatus('Error', 'err');
   } finally {
     _ldpRunning = false;
